@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".demo.viewmodel.QuizActivity">
+
+    <Button
+        android:id="@+id/true_btn1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button 1"
+        />
+
+    <Button
+        android:id="@+id/true_btn2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button 2"
+        />
+
+    <Button
+        android:id="@+id/true_btn3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button 3"
+        />
+    <Button
+        android:id="@+id/true_btn4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button 4"
+        />
+    <Button
+        android:id="@+id/true_btn5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button 5"
+        />
+</LinearLayout>

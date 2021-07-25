@@ -19,7 +19,6 @@ class HomePageAdapter(homePageItemList: List<HomePageItem>): RecyclerView.Adapte
 
     internal class HomePageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var mItemButton:Button? = null
-
         init {
             mItemButton = itemView.findViewById(R.id.homepage_btn)
         }

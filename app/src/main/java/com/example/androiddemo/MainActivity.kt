@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androiddemo.demo.parcelable.ParcelableDemoActivity
+import com.example.androiddemo.demo.viewmodel.QuizActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +40,13 @@ class MainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(TAG,"<<Parcelable Demo>> is clicked!")
                 Intent(mContext, ParcelableDemoActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("ViewModel Demo", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<ViewModel Demo>> is clicked!")
+                Intent(mContext, QuizActivity::class.java).apply { startActivity(this) }
             }
         }))
     }
