@@ -18,6 +18,8 @@
         </activity>
         <activity android:name=".demo.parcelable.ParcelableDemoActivity"/>
         <activity android:name=".demo.viewmodel.QuizActivity"/>
+        <activity android:name=".demo.parcelable.ParcelabelDemoPage2"/>
+        <activity android:name=".demo.parcelable.ParcelableDemoPage1"/>
 
 
     </application>

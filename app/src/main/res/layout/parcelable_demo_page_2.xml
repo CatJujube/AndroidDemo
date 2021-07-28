@@ -7,16 +7,17 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="parcelable 测试"
+        android:text="parcelable 测试页面2"
         android:gravity="center"
         />
     <Button
-        android:id="@+id/parcelable_demo1_btn"
+        android:id="@+id/parcelable_demo2_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="跳转到测试页面2"
+        android:text="返回上一个页面"
         android:textColor="@color/white"
         android:gravity="center"
         android:background="@color/design_default_color_primary"
         />
+
 </LinearLayout>

@@ -7,7 +7,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.androiddemo.demo.mvvm.MVVMDemoActivity
 import com.example.androiddemo.demo.parcelable.ParcelableDemoActivity
+import com.example.androiddemo.demo.parcelable.ParcelableDemoPage1
 import com.example.androiddemo.demo.viewmodel.QuizActivity
 
 
@@ -39,9 +41,15 @@ class MainActivity : AppCompatActivity() {
         mDataList?.add(HomePageItem("Parcelable Demo", object :HomePageItem.HomePageItemCallback{
             override fun onClick() {
                 Log.i(TAG,"<<Parcelable Demo>> is clicked!")
-                Intent(mContext, ParcelableDemoActivity::class.java).apply { startActivity(this) }
+                Intent(mContext, ParcelableDemoPage1::class.java).apply { startActivity(this) }
             }
         }))
+//        mDataList?.add(HomePageItem("MVVMDemoActivity Demo", object :HomePageItem.HomePageItemCallback{
+//            override fun onClick() {
+//                Log.i(TAG,"<<MVVMDemoActivity Demo>> is clicked!")
+//                Intent(mContext, MVVMDemoActivity::class.java).apply { startActivity(this) }
+//            }
+//        }))
 
         mDataList?.add(HomePageItem("ViewModel Demo", object :HomePageItem.HomePageItemCallback{
             override fun onClick() {
