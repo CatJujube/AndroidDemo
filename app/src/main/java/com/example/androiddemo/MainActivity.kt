@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.androiddemo.Criminallntent.CrimeActivity
 import com.example.androiddemo.demo.mvvm.MVVMDemoActivity
 import com.example.androiddemo.demo.parcelable.ParcelableDemoActivity
 import com.example.androiddemo.demo.parcelable.ParcelableDemoPage1
@@ -55,6 +56,13 @@ class MainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(TAG,"<<ViewModel Demo>> is clicked!")
                 Intent(mContext, QuizActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("Criminallntent App", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<Criminallntent App>> is clicked!")
+                Intent(mContext, CrimeActivity::class.java).apply { startActivity(this) }
             }
         }))
     }

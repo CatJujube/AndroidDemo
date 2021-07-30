@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">AndroidDemo</string>
+    <string name="cirme_title_hint">please enter a title of the crime</string>
+    <string name="cirme_title_label">Title</string>
+    <string name="cirme_detail_label">Details</string>
+    <string name="cirme_sloved_label">Sloved</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="new_crime">New Crime</string>
 </resources>
