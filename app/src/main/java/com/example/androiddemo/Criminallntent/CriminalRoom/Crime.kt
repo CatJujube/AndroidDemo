@@ -8,5 +8,9 @@ import java.util.*
 data class Crime(@PrimaryKey val id:UUID = UUID.randomUUID(),
                  var title:String = "",
                  var date:Date = Date(),
-                 var isSloved:Boolean = false
-                 )
+                 var isSloved:Boolean = false,
+                 var suspect:String = ""
+                 ){
+    val photoFileName
+    get() = "IMG_$id.jpg"
+}

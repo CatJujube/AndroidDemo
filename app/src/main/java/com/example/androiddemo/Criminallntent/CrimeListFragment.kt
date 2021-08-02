@@ -80,9 +80,10 @@ class CrimeListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        crime = Crime()
-        val crimeId:UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
-        crimeDetailViewModel.loadCrime(crimeId)
+        setHasOptionsMenu(true)
+//        crime = Crime()
+//        val crimeId:UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
+//        crimeDetailViewModel.loadCrime(crimeId)
     }
 
     override fun onCreateView(
@@ -126,6 +127,20 @@ class CrimeListFragment : Fragment() {
     fun updateUI(crimes: List<Crime>){
         adater = CrimeAdapter(crimes)
         crimeRecyclerView.adapter = adater
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.new_crime -> {
+                val crime = Crime()
+                crimeListViewModel.addCrime(crime)
+                callbacks?.onCrimeSelected(crimeId = crime.id)
+                true
+            }
+            else -> {
+                return super.onOptionsItemSelected(item)
+            }
+        }
     }
 
     interface Callbacks{
