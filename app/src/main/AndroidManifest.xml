@@ -3,51 +3,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.androiddemo">
 
-    <uses-feature android:name="android.hardware.camera"
-        android:required="false"
-        />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
+        android:name=".Criminallntent.CriminalRoom.CriminalIntentApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AndroidDemo"
-        android:name=".Criminallntent.CriminalRoom.CriminalIntentApplication"
-        >
-
+        android:theme="@style/Theme.AndroidDemo">
+        <activity
+            android:name=".BeatBox.BeatBoxMainActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.example.kotlindemo.KotlinActivity"
+            android:exported="true" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".demo.parcelable.ParcelableDemoActivity" />
         <activity android:name=".demo.viewmodel.QuizActivity" />
         <activity android:name=".demo.parcelable.ParcelabelDemoPage2" />
         <activity android:name=".demo.parcelable.ParcelableDemoPage1" />
-        <activity android:name=".Criminallntent.CrimeActivity"/>
+        <activity android:name=".Criminallntent.CrimeActivity" />
 
         <provider
-            android:authorities="${applicationId}.fileprovider"
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.androiddemo.Criminallntent.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true"
-            android:name="androidx.core.content.FileProvider">
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-<!--        <activity android:name=".BrowserActivity"-->
-<!--            android:label="@string/app_name"-->
-<!--            tools:ignore="AppLinkUrlError">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.VIEW"/>-->
-<!--                <category android:name="android.intent.category.DEFAULT"/>-->
-<!--                <data android:scheme="http" android:host="www.bignerdranch.com"/>-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
     </application>
 
 </manifest>

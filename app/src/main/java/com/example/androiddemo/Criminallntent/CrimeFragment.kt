@@ -25,6 +25,7 @@ import com.example.androiddemo.R
 import java.io.File
 import java.sql.BatchUpdateException
 import java.util.*
+import androidx.lifecycle.Observer
 
 private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
@@ -35,6 +36,9 @@ private const val REQUEST_PHOTO = 2
 private const val DATE_FORMAT = "EEE, MMM, dd"
 
 class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
+    private val crimeDetailViewModel:CrimeDetailViewModel by lazy {
+        ViewModelProvider(this).get(CrimeDetailViewModel::class.java)
+    }
     private lateinit var crime: Crime
     private lateinit var titleFiled: EditText
     private lateinit var dateButton: Button
@@ -46,13 +50,8 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
     private lateinit var photoFile: File
     private var photoUri: Uri? = null
 
-    private val crimeDetailViewModel:CrimeDetailViewModel by lazy {
-        ViewModelProvider(this).get(CrimeDetailViewModel::class.java)
-    }
-
-
     companion object{
-        const val TAG = "Criminallntent"
+        const val TAG = "Criminallntent_MSG"
         fun newInstance(crimeId:UUID):CrimeFragment{
             val args = Bundle().apply {
                 putSerializable(ARG_CRIME_ID, crimeId)
@@ -65,6 +64,10 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.i(TAG, "onCreate")
+        crime = Crime()
+        val crimeId:UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
+        crimeDetailViewModel.loadCrime(crimeId)
     }
 
     override fun onCreateView(
@@ -78,29 +81,25 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
         slovedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
         reportButton = view.findViewById<Button>(R.id.crime_report) as Button
         suspectButton = view.findViewById(R.id.crime_suspect) as Button
-        photoView = view.findViewById(R.id.crime_photo)
-        photoButton = view.findViewById(R.id.crime_camera)
+        photoView = view.findViewById(R.id.crime_photo) as ImageView
+        photoButton = view.findViewById(R.id.crime_camera) as ImageButton
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.i(TAG, "onViewCreated")
-        crime = Crime()
-        photoFile = crimeDetailViewModel.getPhotoFile(crime)
-        photoUri = FileProvider.getUriForFile(requireActivity(),"com.example.androiddemo.Criminallntent.provider",photoFile)
-        updateUI()
         crimeDetailViewModel.crimeLiveData.observe(
-            viewLifecycleOwner,
-            androidx.lifecycle.Observer { crime ->
+            this,
+            Observer{ crime ->
                 crime?.let {
                     this.crime = crime
-                    photoFile = crimeDetailViewModel.getPhotoFile(crime)
+                    photoFile = crimeDetailViewModel.getPhotoFile(this.crime)
                     photoUri = FileProvider.getUriForFile(requireActivity(),"com.example.androiddemo.Criminallntent.fileprovider",photoFile)
                     updateUI()
+                    updatePhotoView()
                 }
-            }
-        )
+            })
     }
 
     override fun onStart() {
@@ -122,11 +121,13 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
 
         slovedCheckBox.apply {
             setOnClickListener {
-                setOnCheckedChangeListener { buttonView, isChecked ->
+                setOnCheckedChangeListener { _, isChecked ->
+                    Log.i(TAG, "onStart->slovedCheckBox "+isChecked.toString())
                     crime.isSloved = isChecked
                 }
             }
         }
+
         dateButton.setOnClickListener{
             DatePickFragment.newInstance(crime.date).apply{
                 setTargetFragment(this@CrimeFragment, REQUEST_DATE)
@@ -166,7 +167,6 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
             if(resolvedActivity == null) isEnabled = false
 
             setOnClickListener {
-//                if(photoUri == null) photoUri = FileProvider.getUriForFile(requireActivity(),"com.example.androiddemo.Criminallntent.fileprovider",photoFile)
                 captureImage.putExtra(MediaStore.EXTRA_OUTPUT,photoUri)
                 val cameraActivities:List<ResolveInfo> = packageManager.queryIntentActivities(captureImage,PackageManager.MATCH_DEFAULT_ONLY)
                 for(cameraActivity in cameraActivities){
@@ -176,6 +176,7 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     )
                 }
+                Log.i(TAG, "photoButton/startActivityForResult")
                 startActivityForResult(captureImage, REQUEST_PHOTO)
             }
         }
@@ -183,22 +184,23 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
 
     override fun onStop() {
         super.onStop()
+        Log.i(TAG, "onStop")
         crimeDetailViewModel.saveCrime(crime)
     }
 
     private fun updateUI(){
+        Log.i(TAG, "updateUI")
         titleFiled.setText(crime.title)
         dateButton.text = crime.date.toString()
-        slovedCheckBox.apply {
-            isChecked = crime.isSloved
-            jumpDrawablesToCurrentState()
-        }
+        slovedCheckBox.isChecked = crime.isSloved
+        slovedCheckBox.jumpDrawablesToCurrentState()
         if(crime.suspect.isNotEmpty()){
             suspectButton.text = crime.suspect
         }
     }
 
     private fun getCrimeReport():String{
+        Log.i(TAG, "getCrimeReport")
         val slovedString = if(crime.isSloved){
             getString(R.string.crime_report_solved)
         }else{
@@ -222,8 +224,9 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.i(TAG, "onActivityResult")
         when{
-            requestCode != Activity.RESULT_OK -> return
+            resultCode != Activity.RESULT_OK -> return
 
             requestCode == REQUEST_CONTACT && data!=null -> {
                 val contactUri: Uri? = data.data
@@ -240,6 +243,7 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
             }
 
             requestCode == REQUEST_PHOTO -> {
+                Log.i(TAG, "onActivityResult REQUEST_PHOTO")
                 requireActivity().revokeUriPermission(photoUri,
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 updatePhotoView()
@@ -254,6 +258,7 @@ class CrimeFragment : Fragment(),DatePickFragment.Callbacks {
     }
 
     private fun updatePhotoView(){
+        Log.i(TAG, "updatePhotoView")
         if(photoFile.exists()){
             val bitmap = PictureUtil.getScaledBitmap(photoFile.path,requireActivity())
             photoView.setImageBitmap(bitmap)

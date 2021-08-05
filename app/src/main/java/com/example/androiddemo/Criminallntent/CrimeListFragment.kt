@@ -4,10 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.View.VISIBLE
 import androidx.fragment.app.Fragment
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,11 +25,7 @@ class CrimeListFragment : Fragment() {
     private lateinit var crimeRecyclerView: RecyclerView
     private var adater:CrimeAdapter? = CrimeAdapter(emptyList())
     private var callbacks: Callbacks? = null
-    private lateinit var crime: Crime
     private lateinit var solvedCheckBox: CheckBox
-    private val crimeDetailViewModel:CrimeDetailViewModel by lazy {
-        ViewModelProvider(this).get(CrimeDetailViewModel::class.java)
-    }
 
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProvider(this).get(CrimeListViewModel::class.java)
@@ -46,6 +43,7 @@ class CrimeListFragment : Fragment() {
         private lateinit var crime:Crime
         val titleTextView:TextView = itemView.findViewById(R.id.crime_title)
         val dateTextView:TextView = itemView.findViewById(R.id.crime_date)
+        val crimeImageView:ImageView = itemView.findViewById(R.id.crime_solved_img)
 
         init {
             itemView.setOnClickListener(this)
@@ -55,10 +53,12 @@ class CrimeListFragment : Fragment() {
             this.crime = crime
             titleTextView.text = this.crime.title
             dateTextView.text = this.crime.date.toString()
+            if(crime.isSloved){
+                crimeImageView.visibility = VISIBLE
+            }
         }
 
         override fun onClick(v: View?) {
-            Toast.makeText(context,"${crime.title} pressed!",Toast.LENGTH_SHORT ).show()
             callbacks?.onCrimeSelected(crime.id)
         }
     }
@@ -81,9 +81,6 @@ class CrimeListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-//        crime = Crime()
-//        val crimeId:UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
-//        crimeDetailViewModel.loadCrime(crimeId)
     }
 
     override fun onCreateView(
@@ -102,7 +99,6 @@ class CrimeListFragment : Fragment() {
             viewLifecycleOwner,
             Observer {
                 crimes-> crimes?.let {
-                Log.i(TAG,"Got crimes ${crimes.size}")
                     updateUI(crimes)
                 }
             }
