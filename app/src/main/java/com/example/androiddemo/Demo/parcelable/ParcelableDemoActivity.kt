@@ -1,4 +1,4 @@
-package com.example.androiddemo.demo.parcelable
+package com.example.androiddemo.Demo.parcelable
 
 import android.app.Activity
 import android.os.Bundle

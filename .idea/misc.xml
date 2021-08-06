@@ -5,7 +5,10 @@
       <map>
         <entry key="app/src/main/res/layout/activity_beat_box_main.xml" value="0.278125" />
         <entry key="app/src/main/res/layout/activity_kotlin.xml" value="0.27760416666666665" />
+        <entry key="app/src/main/res/layout/activity_nerd_main.xml" value="0.26145833333333335" />
+        <entry key="app/src/main/res/layout/activity_photo_gallery.xml" value="0.278125" />
         <entry key="app/src/main/res/layout/fragment_crime.xml" value="0.2105978260869565" />
+        <entry key="app/src/main/res/layout/fragment_photo_gallery.xml" value="0.278125" />
         <entry key="app/src/main/res/layout/list_crime_item.xml" value="0.21833839918946302" />
         <entry key="app/src/main/res/layout/list_item_sound.xml" value="0.2578125" />
         <entry key="app/src/main/res/layout/parcelable_demo_page.xml" value="0.20742753623188406" />

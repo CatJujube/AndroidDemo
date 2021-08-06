@@ -1,12 +1,10 @@
-package com.example.androiddemo.demo.viewmodel
+package com.example.androiddemo.Demo.viewmodel
 
-import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import com.example.androiddemo.R
 

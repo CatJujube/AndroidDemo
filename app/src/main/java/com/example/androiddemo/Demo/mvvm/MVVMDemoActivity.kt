@@ -1,6 +1,5 @@
-package com.example.androiddemo.demo.mvvm
+package com.example.androiddemo.Demo.mvvm
 
-import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView

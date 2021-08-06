@@ -7,6 +7,8 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name=".Criminallntent.CriminalRoom.CriminalIntentApplication"
         android:allowBackup="true"
@@ -15,11 +17,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidDemo">
+        <activity android:name=".PhotoGallery.PhotoGalleryActivity" />
         <activity
-            android:name=".BeatBox.BeatBoxMainActivity"
+            android:name=".NerdLauncher.NerdMainActivity"
             android:exported="true" />
         <activity
-            android:name="com.example.kotlindemo.KotlinActivity"
+            android:name="com.example.KotlinDemo.KotlinActivity"
             android:exported="true" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -28,10 +31,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".demo.parcelable.ParcelableDemoActivity" />
-        <activity android:name=".demo.viewmodel.QuizActivity" />
-        <activity android:name=".demo.parcelable.ParcelabelDemoPage2" />
-        <activity android:name=".demo.parcelable.ParcelableDemoPage1" />
+        <activity android:name=".Demo.parcelable.ParcelableDemoActivity" />
+        <activity android:name=".Demo.viewmodel.QuizActivity" />
+        <activity android:name=".Demo.parcelable.ParcelabelDemoPage2" />
+        <activity android:name=".Demo.parcelable.ParcelableDemoPage1" />
         <activity android:name=".Criminallntent.CrimeActivity" />
 
         <provider

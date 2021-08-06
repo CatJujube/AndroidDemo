@@ -7,13 +7,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.androiddemo.BeatBox.BeatBoxMainActivity
 import com.example.androiddemo.Criminallntent.CrimeActivity
-import com.example.androiddemo.demo.mvvm.MVVMDemoActivity
-import com.example.androiddemo.demo.parcelable.ParcelableDemoActivity
-import com.example.androiddemo.demo.parcelable.ParcelableDemoPage1
-import com.example.androiddemo.demo.viewmodel.QuizActivity
-import com.example.kotlindemo.KotlinActivity
+import com.example.androiddemo.Demo.parcelable.ParcelableDemoPage1
+import com.example.androiddemo.Demo.viewmodel.QuizActivity
+import com.example.androiddemo.NerdLauncher.NerdMainActivity
+import com.example.KotlinDemo.KotlinActivity
+import com.example.androiddemo.PhotoGallery.PhotoGalleryActivity
+import com.example.androiddemo.PhotoGallery.PhotoGalleryFragment
 
 
 class MainActivity : AppCompatActivity() {
@@ -75,10 +75,17 @@ class MainActivity : AppCompatActivity() {
             }
         }))
 
-        mDataList?.add(HomePageItem("BeatBox Demo", object :HomePageItem.HomePageItemCallback{
+        mDataList?.add(HomePageItem("NerdLauncher Demo", object :HomePageItem.HomePageItemCallback{
             override fun onClick() {
-                Log.i(TAG,"<<BeatBox Demo>> is clicked!")
-                Intent(mContext, BeatBoxMainActivity::class.java).apply { startActivity(this) }
+                Log.i(TAG,"<<NerdLauncher Demo>> is clicked!")
+                Intent(mContext, NerdMainActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("Photo Gallery Demo", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<Photo Gallery Demo>> is clicked!")
+                Intent(mContext, PhotoGalleryActivity::class.java).apply { startActivity(this) }
             }
         }))
     }

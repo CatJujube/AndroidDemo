@@ -1,4 +1,4 @@
-package com.example.kotlindemo
+package com.example.KotlinDemo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,7 +12,8 @@ class KotlinActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_kotlin)
         GlobalScope.launch (Dispatchers.Main ) {
-            CoroutineDemo.runSuspend()
+//            CoroutineDemo.runSuspend()
+            CoroutineDemo.runSuspendBeta()
         }
     }
 }

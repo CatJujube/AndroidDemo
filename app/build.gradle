@@ -34,8 +34,8 @@ android {
         jvmTarget = '1.8'
     }
 
-    dataBinding{
-        enabled = true
+    buildFeatures{
+        dataBinding = true
     }
     sourceSets {
         main {
@@ -80,4 +80,9 @@ dependencies {
     //AppCompat依赖
     //noinspection GradleCompatible
     implementation "com.android.support:appcompat-v7:28.0.0"
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'//Retorift2依赖
+
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'//数据解析转换器
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.6.2'//支持RxJav
+    implementation 'com.squareup.retrofit2:converter-scalars:2.6.2'
 }

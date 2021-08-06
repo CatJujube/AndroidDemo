@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Crime::class], version = 2)
+@Database(entities = [Crime::class], version = 2, exportSchema = false)
 @TypeConverters(CrimeTypeConverts::class)
 abstract class CrimeDataBase :RoomDatabase(){
     abstract fun crimeDao():CrimeDao
