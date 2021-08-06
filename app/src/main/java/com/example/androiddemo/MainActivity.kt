@@ -12,6 +12,7 @@ import com.example.androiddemo.Demo.parcelable.ParcelableDemoPage1
 import com.example.androiddemo.Demo.viewmodel.QuizActivity
 import com.example.androiddemo.NerdLauncher.NerdMainActivity
 import com.example.KotlinDemo.KotlinActivity
+import com.example.androiddemo.DragAndDraw.DragAndDrawActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryFragment
 
@@ -86,6 +87,13 @@ class MainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(TAG,"<<Photo Gallery Demo>> is clicked!")
                 Intent(mContext, PhotoGalleryActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("Drag And Draw Demo", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<Drag And Draw Demo>> is clicked!")
+                Intent(mContext, DragAndDrawActivity::class.java).apply { startActivity(this) }
             }
         }))
     }
