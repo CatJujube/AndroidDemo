@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.FlutterDemo.FlutterMainActivity
 import com.example.androiddemo.Criminallntent.CrimeActivity
 import com.example.androiddemo.Demo.parcelable.ParcelableDemoPage1
 import com.example.androiddemo.Demo.viewmodel.QuizActivity
@@ -15,6 +16,7 @@ import com.example.KotlinDemo.KotlinActivity
 import com.example.androiddemo.DragAndDraw.DragAndDrawActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryFragment
+import io.flutter.embedding.android.FlutterActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -94,6 +96,13 @@ class MainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(TAG,"<<Drag And Draw Demo>> is clicked!")
                 Intent(mContext, DragAndDrawActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("Flutter Demo", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<Flutter Demo>> is clicked!")
+                startActivity(FlutterActivity.createDefaultIntent(mContext))
             }
         }))
     }
