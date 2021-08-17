@@ -13,6 +13,8 @@ import com.example.androiddemo.Demo.parcelable.ParcelableDemoPage1
 import com.example.androiddemo.Demo.viewmodel.QuizActivity
 import com.example.androiddemo.NerdLauncher.NerdMainActivity
 import com.example.KotlinDemo.KotlinActivity
+import com.example.androiddemo.CameraXDemo.CameraXMainActivity
+import com.example.androiddemo.CameraXDemo.CameraXSavePicLocal.CameraXSavePicLocalMainActivity
 import com.example.androiddemo.DragAndDraw.DragAndDrawActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryFragment
@@ -44,6 +46,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initData(){
+        mDataList?.add(HomePageItem("CameraXSavePicLocal", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<CameraXSavePicLocal>> is clicked!")
+                Intent(mContext, CameraXSavePicLocalMainActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("CameraX", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<CameraX>> is clicked!")
+                Intent(mContext, CameraXMainActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
         mDataList?.add(HomePageItem("Parcelable Demo", object :HomePageItem.HomePageItemCallback{
             override fun onClick() {
                 Log.i(TAG,"<<Parcelable Demo>> is clicked!")

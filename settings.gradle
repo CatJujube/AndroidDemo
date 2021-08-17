@@ -5,3 +5,4 @@ evaluate(new File(
         rootDir.path + '/my_flutter/.android/include_flutter.groovy'
 ))
 
+include ':cameraxex'

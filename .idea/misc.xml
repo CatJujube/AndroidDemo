@@ -4,6 +4,9 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_beat_box_main.xml" value="0.278125" />
+        <entry key="app/src/main/res/layout/activity_camera_xmain.xml" value="0.23854166666666668" />
+        <entry key="app/src/main/res/layout/activity_camera_xsave_pic_local_edit_photo.xml" value="0.29791666666666666" />
+        <entry key="app/src/main/res/layout/activity_camera_xsave_pic_local_main.xml" value="0.2947916666666667" />
         <entry key="app/src/main/res/layout/activity_drag_and_draw.xml" value="0.2630208333333333" />
         <entry key="app/src/main/res/layout/activity_flutter_main.xml" value="0.44635416666666666" />
         <entry key="app/src/main/res/layout/activity_kotlin.xml" value="0.27760416666666665" />
@@ -15,6 +18,8 @@
         <entry key="app/src/main/res/layout/list_item_sound.xml" value="0.2578125" />
         <entry key="app/src/main/res/layout/parcelable_demo_page.xml" value="0.20742753623188406" />
         <entry key="app/src/main/res/xml/provider_paths.xml" value="0.2671875" />
+        <entry key="cameraxex/src/main/res/drawable/ic_delete.xml" value="0.30364583333333334" />
+        <entry key="cameraxex/src/main/res/layout/activity_camera_xex_main.xml" value="0.490625" />
       </map>
     </option>
   </component>

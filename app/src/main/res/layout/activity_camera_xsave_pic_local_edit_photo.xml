@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CameraXDemo.CameraXSavePicLocal.CameraXSavePicLocalMainActivity">
+
+    <ImageView
+        android:id="@+id/edit_image_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/camera_bottom_layout"
+        />
+    <RelativeLayout
+        android:id="@+id/camera_bottom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="112dp"
+        android:layout_alignParentBottom="true"
+        >
+        <Button
+            android:id="@+id/camera_edit_left_button"
+            android:layout_height="40dp"
+            android:layout_width="40dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="52dp"
+            android:background="@drawable/refresh"
+            />
+        <Button
+            android:id="@+id/camera_edit_middle_button"
+            android:layout_height="64dp"
+            android:layout_width="64dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/ok"
+            />
+        <Button
+            android:id="@+id/camera_edit_right_button"
+            android:layout_height="40dp"
+            android:layout_width="40dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="52dp"
+            android:background="@drawable/edit"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>
