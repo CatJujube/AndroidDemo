@@ -22,6 +22,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidDemo">
         <activity
+            android:name=".OpenGLESDemos.CameraXAndOpenglEs.CameraXAndOpenglEsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".OpenGLESDemos.OpenglEsDrawRectActivity"
+            android:exported="true" />
+        <activity
+            android:name=".OpenGLESDemos.OpenglEsMainActivity"
+            android:exported="true" />
+        <activity
+            android:name=".Demo.MirrorDemoMainActivity"
+            android:exported="true" />
+        <activity
+            android:name=".Demo.extendframelayout.ExtendFrameLayoutMainActivity"
+            android:exported="true" />
+        <activity
             android:name=".CameraXDemo.CameraXSavePicLocal.CameraXSavePicLocalEditPhotoActivity"
             android:exported="true" />
         <activity

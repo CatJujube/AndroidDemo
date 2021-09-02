@@ -15,7 +15,10 @@ import com.example.androiddemo.NerdLauncher.NerdMainActivity
 import com.example.KotlinDemo.KotlinActivity
 import com.example.androiddemo.CameraXDemo.CameraXMainActivity
 import com.example.androiddemo.CameraXDemo.CameraXSavePicLocal.CameraXSavePicLocalMainActivity
+import com.example.androiddemo.Demo.MirrorDemoMainActivity
+import com.example.androiddemo.Demo.extendframelayout.ExtendFrameLayoutMainActivity
 import com.example.androiddemo.DragAndDraw.DragAndDrawActivity
+import com.example.androiddemo.OpenGLESDemos.OpenglEsMainActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryActivity
 import com.example.androiddemo.PhotoGallery.PhotoGalleryFragment
 import io.flutter.embedding.android.FlutterActivity
@@ -119,6 +122,27 @@ class MainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(TAG,"<<Flutter Demo>> is clicked!")
                 startActivity(FlutterActivity.createDefaultIntent(mContext))
+            }
+        }))
+
+        mDataList?.add(HomePageItem("ExtendFrameLayout Demo", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<ExtendFrameLayout Demo>> is clicked!")
+                Intent(mContext, ExtendFrameLayoutMainActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("Mirror Demo", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<Mirror Demo>> is clicked!")
+                Intent(mContext, MirrorDemoMainActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("OpenGLES Demos", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"<<OpenGLES Demos>> is clicked!")
+                Intent(mContext, OpenglEsMainActivity::class.java).apply { startActivity(this) }
             }
         }))
     }

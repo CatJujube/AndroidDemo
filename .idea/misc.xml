@@ -4,13 +4,18 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_beat_box_main.xml" value="0.278125" />
+        <entry key="app/src/main/res/layout/activity_camera_xand_opengl_es.xml" value="0.30625" />
         <entry key="app/src/main/res/layout/activity_camera_xmain.xml" value="0.23854166666666668" />
         <entry key="app/src/main/res/layout/activity_camera_xsave_pic_local_edit_photo.xml" value="0.29791666666666666" />
         <entry key="app/src/main/res/layout/activity_camera_xsave_pic_local_main.xml" value="0.2947916666666667" />
         <entry key="app/src/main/res/layout/activity_drag_and_draw.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/activity_extend_frame_layout_main.xml" value="0.36302083333333335" />
         <entry key="app/src/main/res/layout/activity_flutter_main.xml" value="0.44635416666666666" />
         <entry key="app/src/main/res/layout/activity_kotlin.xml" value="0.27760416666666665" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.2644927536231884" />
+        <entry key="app/src/main/res/layout/activity_mirror_demo_main.xml" value="0.3383152173913043" />
         <entry key="app/src/main/res/layout/activity_nerd_main.xml" value="0.26145833333333335" />
+        <entry key="app/src/main/res/layout/activity_opengl_es_main.xml" value="0.32760416666666664" />
         <entry key="app/src/main/res/layout/activity_photo_gallery.xml" value="0.278125" />
         <entry key="app/src/main/res/layout/fragment_crime.xml" value="0.2105978260869565" />
         <entry key="app/src/main/res/layout/fragment_photo_gallery.xml" value="0.278125" />

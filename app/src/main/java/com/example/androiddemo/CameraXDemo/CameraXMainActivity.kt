@@ -2,24 +2,35 @@ package com.example.androiddemo.CameraXDemo
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.graphics.SurfaceTexture
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
+import android.view.Surface
+import android.view.TextureView
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.camera.core.*
+import androidx.camera.core.impl.PreviewConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.androiddemo.R
 import java.io.File
+import java.lang.Exception
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.function.Consumer
 
 class CameraXMainActivity : AppCompatActivity() {
     companion object {
@@ -34,7 +45,7 @@ class CameraXMainActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var mCameraCaptureBtn:Button
-    private lateinit var mViewFinder:PreviewView
+    private var mViewFinder:SurfaceTexture = SurfaceTexture(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +64,7 @@ class CameraXMainActivity : AppCompatActivity() {
         // Set up the listener for take photo button
         mCameraCaptureBtn = findViewById(R.id.camera_capture_button)
         mCameraCaptureBtn.setOnClickListener { takePhoto() }
-        mViewFinder = findViewById(R.id.viewFinder)
+//        mViewFinder = findViewById(R.id.viewFinder)
     }
 
     private fun initData(){
@@ -80,6 +91,7 @@ class CameraXMainActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
                     val msg = "Photo capture succeeded: $savedUri"
+
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
                 }
@@ -127,11 +139,6 @@ class CameraXMainActivity : AppCompatActivity() {
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
             // Preview
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(mViewFinder.surfaceProvider)
-                }
             imageCapture = ImageCapture.Builder().build()
             val imageAnalyzer = ImageAnalysis.Builder().build().also {
                 it.setAnalyzer(cameraExecutor, LuminosityAnalyzer{
@@ -140,17 +147,29 @@ class CameraXMainActivity : AppCompatActivity() {
             }
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            val preview: Preview = Preview.Builder()
+                .setTargetResolution(Size(720, 1280))
+                .build()
 
             try {
-                // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
-                // Bind use cases to camera
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview,imageCapture,imageAnalyzer)
+                val camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview)
+                val surfaceProvider = Preview.SurfaceProvider { request ->
+                    val resolution: Size = request.resolution
+                    mViewFinder.setDefaultBufferSize(
+                        resolution.width,
+                        resolution.height
+                    )
+                    val surface: Surface = Surface(mViewFinder)
+                    request.provideSurface(
+                        surface,
+                        ContextCompat.getMainExecutor(baseContext),
+                        { result -> })
+                }
+                preview.setSurfaceProvider(surfaceProvider)
+            }catch (e:Exception){
 
-            } catch(exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
             }
-
         }, ContextCompat.getMainExecutor(this))
     }
 }

@@ -2,6 +2,7 @@ package com.example.cameraxex
 
 import androidx.annotation.NonNull
 import androidx.camera.core.*
+import androidx.camera.core.CameraControl
 import androidx.camera.view.PreviewView
 import com.example.cameraxex.FocusModule.CameraFocusView
 
