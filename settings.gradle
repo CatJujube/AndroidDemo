@@ -1,8 +1,9 @@
-rootProject.name = "AndroidDemo"
+//import android.renderscript.ScriptGroup
+//
+//rootProject.name = "AndroidDemo"
+//setBinding(new ScriptGroup.Binding([gradle: this]))
+//evaluate(new File(
+//        rootDir.path + '/my_flutter/.android/include_flutter.groovy'
+//))
 include ':app'
-setBinding(new Binding([gradle: this]))
-evaluate(new File(
-        rootDir.path + '/my_flutter/.android/include_flutter.groovy'
-))
-
 include ':cameraxex'

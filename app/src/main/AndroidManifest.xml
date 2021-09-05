@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.androiddemo">
+    package="com.jube.androiddemo">
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -21,6 +20,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidDemo">
+        <activity
+            android:name="com.jube.NdkDemo.JniHelloWorldActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.jube.NdkDemo.NDKMainActivity"
+            android:exported="true" />
         <activity
             android:name=".OpenGLESDemos.CameraXAndOpenglEs.CameraXAndOpenglEsActivity"
             android:exported="true" />
@@ -58,7 +63,7 @@
             android:name=".NerdLauncher.NerdMainActivity"
             android:exported="true" />
         <activity
-            android:name="com.example.KotlinDemo.KotlinActivity"
+            android:name="com.jube.KotlinDemo.KotlinActivity"
             android:exported="true" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -75,7 +80,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.androiddemo.Criminallntent.fileprovider"
+            android:authorities="com.jube.androiddemo.Criminallntent.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

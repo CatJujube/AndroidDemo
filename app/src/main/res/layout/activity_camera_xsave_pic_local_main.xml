@@ -39,7 +39,7 @@
         android:layout_below="@+id/camera_head_layout"
         android:layout_above="@+id/camera_bottom_layout"
         />
-    <com.example.androiddemo.CameraXDemo.CameraXSavePicLocal.FocusImageView
+    <com.jube.androiddemo.CameraXDemo.CameraXSavePicLocal.FocusImageView
         android:id="@+id/focus_view"
         android:layout_width="75dp"
         android:layout_height="75dp"

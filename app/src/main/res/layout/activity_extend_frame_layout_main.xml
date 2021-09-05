@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".Demo.extendframelayout.ExtendFrameLayoutMainActivity"
     tools:ignore="MissingDefaultResource">
-    <com.example.androiddemo.Demo.extendframelayout.LeftSlidingMenu
+    <com.jube.androiddemo.Demo.extendframelayout.LeftSlidingMenu
         android:id="@+id/mysliding_menu"
         android:layout_height="match_parent"
         android:layout_width="match_parent"

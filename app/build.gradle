@@ -20,6 +20,20 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                // 指定配置参数，更多参数设置见 https://developer.android.google.cn/ndk/guides/cmake
+                arguments "-DCMAKE_BUILD_TYPE=DEBUG"
+                // 添加CPP标准
+//                cppFlags "-std=c++11"
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            // 指定CMake编译配置文件路径
+            path "src/main/jni/CMakeLists.txt"
+        }
     }
 
     buildTypes {
@@ -94,7 +108,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-scalars:2.6.2'
 
     //导入flutter
-    implementation project(':flutter')
+//    implementation project(':flutter')
 
     //CameraX依赖
     def camerax_version = "1.0.0"
