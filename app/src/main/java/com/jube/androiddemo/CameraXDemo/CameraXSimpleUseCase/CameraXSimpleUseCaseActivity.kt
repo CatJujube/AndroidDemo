@@ -21,8 +21,7 @@ class CameraXSimpleUseCaseActivity : AppCompatActivity() , View.OnClickListener{
     private lateinit var mCameraCaptureButton: ImageButton
     private lateinit var mCameraPhotoViewButton: ImageButton
     private lateinit var mCameraFlashSwitchButton: ImageButton
-    private var mCameraXPreView:CameraXView? = null
-    private val mIsUsingPreviewView:Boolean = true
+    private var mCameraXPreView:CameraX? = null
 
     companion object {
         const val TAG = "CameraXSimpleUseCaseActivity_Log"
@@ -38,7 +37,7 @@ class CameraXSimpleUseCaseActivity : AppCompatActivity() , View.OnClickListener{
 
     private fun initUI(){
         mCameraCaptureButton = findViewById(R.id.camera_capture_button)
-        mCameraSwitchButton = findViewById(R.id.camera_switch_button)
+        mCameraSwitchButton = findViewById(R.id.camera_flip_button)
         mCameraPhotoViewButton = findViewById(R.id.photo_view_button)
         mCameraFlashSwitchButton = findViewById(R.id.flash_switch_button)
 
@@ -51,19 +50,20 @@ class CameraXSimpleUseCaseActivity : AppCompatActivity() , View.OnClickListener{
     }
 
     private fun initCameraXUI(){
-        if(mIsUsingPreviewView){
-            val previewView = findViewById<PreviewView>(R.id.findView)
-            mCameraXPreView = CameraXView(this,previewView)
+        if(CameraX.usingPreviewView){
+            Log.i(CameraX.TAG,"using PreviewView")
+            val previewView = findViewById<PreviewView>(R.id.findView_camerax)
+            mCameraXPreView = CameraX(this,previewView)
         }else {
-            mCameraXPreView = CameraXView(this)
-            val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            params.gravity = Gravity.CENTER_VERTICAL
-            params.width = 500
-            params.height = 500
+            Log.i(CameraX.TAG,"using TextureView")
+//            mCameraXPreView = CameraX(this)
+//            val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT
+//            )
+//            params.gravity = Gravity.CENTER_VERTICAL
 //            (findViewById<ViewGroup>(R.id.frame_layout)).addView(mCameraXPreView, 0, params)
+            mCameraXPreView = findViewById(R.id.cmaerax_view)
         }
     }
 
@@ -90,7 +90,7 @@ class CameraXSimpleUseCaseActivity : AppCompatActivity() , View.OnClickListener{
         when(v?.id){
             R.id.camera_capture_button -> {
                 mCameraXPreView?.takePicture(
-                    object :CameraXView.TakePhotoCallback{
+                    object :CameraX.TakePhotoCallback{
                         override fun success(savedUri: Uri) {
                             setPhotoViewButton(uri = savedUri)
                         }
@@ -102,8 +102,8 @@ class CameraXSimpleUseCaseActivity : AppCompatActivity() , View.OnClickListener{
                 )
             }
 
-            R.id.camera_switch_button -> {
-                mCameraXPreView?.setFlashMode(ImageCapture.FLASH_MODE_AUTO)
+            R.id.camera_flip_button -> {
+                mCameraXPreView?.flip()
             }
 
             R.id.photo_view_button -> {
@@ -111,7 +111,7 @@ class CameraXSimpleUseCaseActivity : AppCompatActivity() , View.OnClickListener{
             }
 
             R.id.flash_switch_button -> {
-                mCameraXPreView?.flip()
+                mCameraXPreView?.setFlashMode(ImageCapture.FLASH_MODE_AUTO)
             }
 
             else -> {

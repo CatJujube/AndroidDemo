@@ -14,9 +14,16 @@
         app:focus_success_id="@drawable/focus_focused" />
 
     <androidx.camera.view.PreviewView
-        android:id="@+id/findView"
+        android:id="@+id/findView_camerax"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <com.jube.androiddemo.CameraXDemo.CameraXSimpleUseCase.CameraX
+        android:id="@+id/cmaerax_view"
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:layout_height="match_parent"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,7 +31,7 @@
         android:layout_marginBottom="20dp">
 
         <ImageButton
-            android:id="@+id/camera_switch_button"
+            android:id="@+id/camera_flip_button"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_centerVertical="true"
