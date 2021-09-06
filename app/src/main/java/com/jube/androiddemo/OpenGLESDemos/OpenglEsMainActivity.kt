@@ -7,10 +7,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.jube.androiddemo.OpenGLESDemos.CameraXAndOpenglEs.CameraXAndOpenglEsActivity
+
 import com.jube.androiddemo.HomePageAdapter
 import com.jube.androiddemo.HomePageItem
 import com.jube.androiddemo.MainActivity
 import com.jube.androiddemo.R
+
 
 class OpenglEsMainActivity : AppCompatActivity() {
     private var mDataList:MutableList<HomePageItem>? = mutableListOf()
@@ -37,6 +40,13 @@ class OpenglEsMainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(MainActivity.TAG,"<<Draw Rectangle>> is clicked!")
                 Intent(mContext, OpenglEsDrawRectActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("CameraXAndOpenglEs", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(MainActivity.TAG,"<<CameraXAndOpenglEs>> is clicked!")
+                Intent(mContext, CameraXAndOpenglEsActivity::class.java).apply { startActivity(this) }
             }
         }))
     }
