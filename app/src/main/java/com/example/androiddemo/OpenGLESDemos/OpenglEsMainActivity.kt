@@ -14,6 +14,7 @@ import com.example.androiddemo.CameraXDemo.CameraXSavePicLocal.CameraXSavePicLoc
 import com.example.androiddemo.HomePageAdapter
 import com.example.androiddemo.HomePageItem
 import com.example.androiddemo.MainActivity
+import com.example.androiddemo.OpenGLESDemos.CameraXAndOpenglEs.CameraXAndOpenglEsActivity
 import com.example.androiddemo.R
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -43,6 +44,13 @@ class OpenglEsMainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(MainActivity.TAG,"<<Draw Rectangle>> is clicked!")
                 Intent(mContext, OpenglEsDrawRectActivity::class.java).apply { startActivity(this) }
+            }
+        }))
+
+        mDataList?.add(HomePageItem("CameraXAndOpenglEs", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(MainActivity.TAG,"<<CameraXAndOpenglEs>> is clicked!")
+                Intent(mContext, CameraXAndOpenglEsActivity::class.java).apply { startActivity(this) }
             }
         }))
     }

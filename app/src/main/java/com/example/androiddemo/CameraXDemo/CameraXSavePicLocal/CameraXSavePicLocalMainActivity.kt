@@ -12,6 +12,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.view.View
 import android.webkit.MimeTypeMap
 import android.widget.Button
@@ -147,12 +148,22 @@ class CameraXSavePicLocalMainActivity : AppCompatActivity() , View.OnClickListen
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private fun startCamera(){
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener(
             Runnable {
                 val cameraProvider = cameraProviderFuture.get()
-                val preview = Preview.Builder().build()
+
+                //Preview
+                val preview = Preview.Builder() .build()
+                val rotationInfo:Int = preview.targetRotation                   /**旋转角度，一般Preview会根据Preview.Builder.setTargetRotation(int)来设置旋转角度，当未设置时会根据Display.getRotation()的值来设置旋转角度*/
+                val resolutionInfo:Size? = preview.attachedSurfaceResolution    /**相机选中的预览尺寸，CameraX会根据Camera2的API在一系列尺寸中选择最适合的一个，这里返回的是选中的尺寸*/
+                preview.setSurfaceProvider {                                    /**为Preview设置一个Surface，Surface可以传入ImageReader，MediaCodec，SurfaceTexture，TextureView，其中**/
+
+
+                }
+
                 mCameraXSavePicLocalModel.mCameraXSavePicLocalLiveData.observe(this@CameraXSavePicLocalMainActivity,
                     Observer {  mCameraXSavePicLocalLiveData ->
                                 mImageCapture = ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
