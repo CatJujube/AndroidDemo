@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.view.Surface
+import android.view.SurfaceView
 import android.view.View
 import android.webkit.MimeTypeMap
 import android.widget.Button
@@ -149,20 +151,33 @@ class CameraXSavePicLocalMainActivity : AppCompatActivity() , View.OnClickListen
     }
 
     @SuppressLint("RestrictedApi")
+    private fun bindPreview():Preview{
+        val preview = Preview.Builder()
+//                    .setTargetRotation()
+//                    .setTargetResolution()
+            .build()
+        val rotationInfo:Int = preview.targetRotation                   /**旋转角度，一般Preview会根据Preview.Builder.setTargetRotation(int)来设置旋转角度，当未设置时会根据Display.getRotation()的值来设置旋转角度*/
+        val resolutionInfo:Size? = preview.attachedSurfaceResolution    /**相机选中的预览尺寸，CameraX会根据Camera2的API在一系列尺寸中选择最适合的一个，这里返回的是选中的尺寸*/
+
+        /**
+         *为Preview设置一个Surface，Surface可以传入ImageReader，MediaCodec，SurfaceTexture，TextureView，其中Surface中如果传入的是SurfaceView那么旋转方向会自动适配；如果是ImageReadder，MediaCodec则应该用户负责管理旋转；
+         *在SurfaceTextViewz中可以调用SurfaceTexture.getTransformMatrix(float[])来获取原本的方向
+         *TextureView也是总处于原本的方向
+         **/
+        preview.setSurfaceProvider {
+            Preview.SurfaceProvider { TODO("Not yet implemented") }
+        }
+        return preview
+    }
+
+    @SuppressLint("RestrictedApi")
     private fun startCamera(){
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener(
             Runnable {
                 val cameraProvider = cameraProviderFuture.get()
 
-                //Preview
-                val preview = Preview.Builder() .build()
-                val rotationInfo:Int = preview.targetRotation                   /**旋转角度，一般Preview会根据Preview.Builder.setTargetRotation(int)来设置旋转角度，当未设置时会根据Display.getRotation()的值来设置旋转角度*/
-                val resolutionInfo:Size? = preview.attachedSurfaceResolution    /**相机选中的预览尺寸，CameraX会根据Camera2的API在一系列尺寸中选择最适合的一个，这里返回的是选中的尺寸*/
-                preview.setSurfaceProvider {                                    /**为Preview设置一个Surface，Surface可以传入ImageReader，MediaCodec，SurfaceTexture，TextureView，其中**/
-
-
-                }
+                val preview = bindPreview()
 
                 mCameraXSavePicLocalModel.mCameraXSavePicLocalLiveData.observe(this@CameraXSavePicLocalMainActivity,
                     Observer {  mCameraXSavePicLocalLiveData ->

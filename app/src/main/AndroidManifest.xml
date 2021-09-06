@@ -21,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidDemo">
         <activity
+            android:name=".CameraXDemo.CameraXSimpleUseCase.CameraXSimpleUseCaseActivity"
+            android:exported="true" />
+        <activity
             android:name="com.jube.NdkDemo.JniHelloWorldActivity"
             android:exported="true" />
         <activity

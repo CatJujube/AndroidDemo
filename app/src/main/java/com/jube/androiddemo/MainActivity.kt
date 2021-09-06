@@ -50,14 +50,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initData(){
-        mDataList?.add(HomePageItem("CameraXSavePicLocal", object :HomePageItem.HomePageItemCallback{
-            override fun onClick() {
-                Log.i(TAG,"<<CameraXSavePicLocal>> is clicked!")
-                Intent(mContext, CameraXSavePicLocalMainActivity::class.java).apply { startActivity(this) }
-            }
-        }))
-
-        mDataList?.add(HomePageItem("CameraX", object :HomePageItem.HomePageItemCallback{
+        mDataList?.add(HomePageItem("CameraX Demos", object :HomePageItem.HomePageItemCallback{
             override fun onClick() {
                 Log.i(TAG,"<<CameraX>> is clicked!")
                 Intent(mContext, CameraXMainActivity::class.java).apply { startActivity(this) }
