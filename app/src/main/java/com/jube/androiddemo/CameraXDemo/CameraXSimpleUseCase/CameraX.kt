@@ -70,11 +70,10 @@ class CameraX :TextureView{
         this.mCameraPreview = preview
     }
 
-    @SuppressLint("RestrictedApi")
+    @SuppressLint("RestrictedApi", "UnsafeOptInUsageError")
     private fun bindPreview(){
         Log.i(TAG,"bindPreview")
         mPreview = Preview.Builder()
-//                    .setTargetRotation()
 //                    .setTargetResolution()
             .build()
 
@@ -82,7 +81,7 @@ class CameraX :TextureView{
         val rotationInfo: Int = mPreview.targetRotation
 
         /**相机选中的预览尺寸，CameraX会根据Camera2的API在一系列尺寸中选择最适合的一个，这里返回的是选中的尺寸*/
-        val resolutionInfo: Size? = mPreview.attachedSurfaceResolution
+//        val resolutionInfo: Size = mPreview.attachedSurfaceResolution!!
 
         /**
          *为Preview设置一个Surface，Surface可以传入ImageReader，MediaCodec，SurfaceTexture，TextureView，其中Surface中如果传入的是SurfaceView那么旋转方向会自动适配；如果是ImageReadder，MediaCodec则应该用户负责管理旋转；
@@ -92,6 +91,7 @@ class CameraX :TextureView{
         when(usingPreviewView){
             true -> {
                 mPreview.setSurfaceProvider(mCameraPreview?.surfaceProvider)
+                mPreview.targetRotation = mCameraPreview?.display?.rotation?:0 //获取旋转角度
                 Log.i(TAG,"using PreviewView init")
             }
             false -> {
@@ -99,8 +99,8 @@ class CameraX :TextureView{
                 mPreview.setSurfaceProvider { request ->
                     val surface = Surface(surfaceTexture)
                     request.provideSurface(surface, mExecutor, {
-//                        surface.release()
-//                        surfaceTexture?.release()
+                        surface.release()
+                        surfaceTexture?.release()
                         Log.v(TAG, "--accept------")
                     })
                     Log.i(TAG,"set surface provider")
@@ -145,13 +145,16 @@ class CameraX :TextureView{
         mCameraProvider = mCameraProviderFuture.get()
     }
 
-    @SuppressLint("UnsafeOptInUsageError")
+    @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
     private fun bindCamera(){
         mCameraProvider.unbindAll()
         mCamera = mCameraProvider.bindToLifecycle(
         mContext as LifecycleOwner,
         mCameraSelector,
         mCameraUseCaseGroup)
+        bindCameraControl()
+        bindCameraInfo()
+        getAttachedResolution()
     }
 
     private fun bindCameraControl(){
@@ -160,6 +163,11 @@ class CameraX :TextureView{
 
     private fun bindCameraInfo(){
         mCameraInfo = mCamera.cameraInfo
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun getAttachedResolution(){
+        val resolutionInfo: Size = mPreview.attachedSurfaceResolution!!
     }
 
     fun startPreview(){
