@@ -22,7 +22,7 @@ import androidx.annotation.NonNull
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.core.util.Consumer
-import com.jube.androiddemo.R
+import com.example.androiddemo.R
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer

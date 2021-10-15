@@ -178,7 +178,6 @@ class CameraXSavePicLocalMainActivity : AppCompatActivity() , View.OnClickListen
                 val cameraProvider = cameraProviderFuture.get()
 
                 val preview = bindPreview()
-
                 mCameraXSavePicLocalModel.mCameraXSavePicLocalLiveData.observe(this@CameraXSavePicLocalMainActivity,
                     Observer {  mCameraXSavePicLocalLiveData ->
                                 mImageCapture = ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
