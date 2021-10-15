@@ -1,0 +1,171 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ln_message_parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="14dp"
+    android:background="@null"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingLeft="14dp"
+    android:paddingRight="14dp">
+
+    <TextView
+        android:id="@+id/msg_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="7dp"
+        android:paddingTop="3dp"
+        android:paddingRight="7dp"
+        android:paddingBottom="3dp"
+        android:textColor="#939699"
+        android:textSize="@dimen/wm_textSize12dp"
+        tools:text="10:11" />
+
+    <LinearLayout
+        android:id="@+id/msg_normal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/msg_normal_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_msg_sender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:maxLines="1"
+                android:textColor="#939699"
+                android:textSize="@dimen/wm_textSize10dp"
+                android:visibility="gone"
+                android:maxEms="15"
+                android:ellipsize="end"
+                tools:text="sendersendersendersendersendersendersendersendersendersendersender"
+                tools:visibility="visible"
+                />
+
+            <TextView
+                android:id="@+id/tv_msg_sendto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/tv_msg_sender"
+                android:maxLines="1"
+                android:padding="5dp"
+                android:textColor="#C8CACC"
+                android:textSize="@dimen/wm_textSize10dp"
+                android:visibility="gone"
+                tools:text="@string/wm_meeting_chat_private_sendto" />
+
+            <TextView
+                android:id="@+id/tv_msg_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/tv_msg_sendto"
+                android:textColor="#939699"
+                android:textSize="@dimen/wm_textSize10dp"
+                android:maxEms="10"
+                android:ellipsize="end"
+                tools:text="receiverreceiverreceiverreceiverreceiverreceiverreceiverreceiver"
+                tools:visibility="visible"/>
+
+            <TextView
+                android:id="@+id/tv_msg_private_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="3dp"
+                android:layout_toEndOf="@id/tv_msg_username"
+                android:textColor="@android:color/holo_orange_dark"
+                android:textSize="@dimen/wm_textSize10dp"
+                android:visibility="gone"
+                tools:text="@string/wm_meeting_chat_private_label" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/leftPlaceHolder"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/middlePlaceHolder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivSendFailed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:minWidth="40dp"
+                    android:src="@drawable/wm_warning_default"
+                    android:visibility="gone" />
+
+                <RelativeLayout
+                    android:id="@+id/layoutImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <com.tencent.wemeet.sdk.meeting.inmeeting.view.im.MaskImageView
+                        android:id="@+id/iv_msg_image"
+                        android:layout_width="158dp"
+                        android:layout_height="158dp"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/wm_abt_in_meeting_chat_img_msg"
+                        android:maxWidth="158dp"
+                        android:maxHeight="158dp"
+                        android:minWidth="60dp"
+                        android:minHeight="60dp" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <ProgressBar
+                            android:id="@+id/pbSendLoading"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:indeterminateBehavior="repeat"
+                            android:indeterminateDrawable="@drawable/wm_anim_loading_gray"
+                            android:indeterminateDuration="2000" />
+
+                        <TextView
+                            android:id="@+id/tvProgress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="0%"
+                            android:textColor="@color/wm_white"
+                            android:textSize="@dimen/wm_textSize16dp" />
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/rightPlaceHolder"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

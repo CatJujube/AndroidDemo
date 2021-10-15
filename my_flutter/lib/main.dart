@@ -7,6 +7,9 @@ import 'package:my_flutter/Exception/SyncException.dart';
 import 'package:my_flutter/Navigator/ImageDemo.dart';
 import 'package:my_flutter/Navigator/SimpleNavigatorDemo.dart';
 import 'package:my_flutter/Navigator/TipRoute.dart';
+import 'package:my_flutter/Projects/BiliBili/BilibiliMain.dart';
+import 'package:my_flutter/Projects/BiliBili/test/BilibiliTestMain.dart';
+import 'package:my_flutter/Projects/ProjectsMain.dart';
 import 'package:my_flutter/Widget/ButtonDemo.dart';
 import 'package:my_flutter/Widget/ContextRouteDemo.dart';
 import 'package:my_flutter/Widget/WidgetDemos.dart';
@@ -37,7 +40,14 @@ class MyApp extends StatelessWidget {
 
         "text_demo":(context) => TextDemo(),
         "button_demo":(context) => ButtonDemo(),
-        "image_demos":(context) => ImageDemos()
+        "image_demos":(context) => ImageDemos(),
+
+        ///projects
+        "projects_demos":(context) => ProjectsMain(),
+        "bilibili_main":(context) => BilibiliMain(),
+        "bilibili_test_main":(context) => BilibiliTestMain(),
+
+
       },
       home: MyHomePage(),
     );
@@ -108,6 +118,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
               ListItem(ListItemData("Widget测试Demos",() {
                 Navigator.of(context).pushNamed("widget_demos");
+              }, Colors.blueAccent)),
+
+              ListItem(ListItemData("实战项目Demos",() {
+                Navigator.of(context).pushNamed("projects_demos");
               }, Colors.blueAccent)),
             ])));
   }
