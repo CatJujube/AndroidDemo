@@ -3,7 +3,6 @@ package com.example.androiddemo.OpenGLESDemos.CameraXAndOpenglEs
 import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.androiddemo.R
 import androidx.camera.lifecycle.ProcessCameraProvider
 
 import android.content.pm.PackageManager
@@ -15,6 +14,7 @@ import androidx.camera.core.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.common.util.concurrent.ListenableFuture
+import com.jube.androiddemo.R
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -61,7 +61,7 @@ class CameraXAndOpenglEsActivity : AppCompatActivity() {
         return ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.CAMERA
-        )
+        )  === PackageManager.PERMISSION_GRANTED
     }
 
     private fun startCamera() {

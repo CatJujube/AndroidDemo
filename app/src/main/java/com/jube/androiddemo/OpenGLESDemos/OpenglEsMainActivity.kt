@@ -7,13 +7,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
-import com.example.androiddemo.CameraXDemo.CameraXSavePicLocal.CameraXSavePicLocalMainActivity
-import com.example.androiddemo.HomePageAdapter
-import com.example.androiddemo.HomePageItem
-import com.example.androiddemo.MainActivity
 import com.example.androiddemo.OpenGLESDemos.CameraXAndOpenglEs.CameraXAndOpenglEsActivity
-import com.example.androiddemo.R
+import com.jube.androiddemo.HomePageAdapter
+import com.jube.androiddemo.HomePageItem
+import com.jube.androiddemo.MainActivity
+import com.jube.androiddemo.R
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
