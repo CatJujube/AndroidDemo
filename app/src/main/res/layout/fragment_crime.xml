@@ -41,7 +41,6 @@
             android:paddingLeft="10dp"
             >
             <TextView
-                style="?android:listSeparatorTextViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/cirme_title_label"
@@ -58,7 +57,6 @@
 
 
     <TextView
-        android:id="?android:listSeparatorTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/cirme_detail_label"

@@ -21,8 +21,12 @@
         <entry key="app/src/main/res/layout/activity_opengl_es_draw_rect.xml" value="0.2984375" />
         <entry key="app/src/main/res/layout/activity_opengl_es_main.xml" value="0.32760416666666664" />
         <entry key="app/src/main/res/layout/activity_photo_gallery.xml" value="0.278125" />
+        <entry key="app/src/main/res/layout/activity_widgets_main.xml" value="0.5234375" />
         <entry key="app/src/main/res/layout/fragment_crime.xml" value="0.2105978260869565" />
+        <entry key="app/src/main/res/layout/fragment_dialog.xml" value="0.5234375" />
         <entry key="app/src/main/res/layout/fragment_photo_gallery.xml" value="0.278125" />
+        <entry key="app/src/main/res/layout/fragment_widgets_main.xml" value="0.5234375" />
+        <entry key="app/src/main/res/layout/fragment_widgets_main_list.xml" value="0.5104166666666666" />
         <entry key="app/src/main/res/layout/homepage_item.xml" value="0.27355072463768115" />
         <entry key="app/src/main/res/layout/list_crime_item.xml" value="0.21833839918946302" />
         <entry key="app/src/main/res/layout/list_item_sound.xml" value="0.2578125" />
