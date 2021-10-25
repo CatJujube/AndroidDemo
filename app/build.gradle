@@ -128,4 +128,21 @@ dependencies {
 // CameraX View class
     implementation "androidx.camera:camera-view:1.0.0-alpha27"
     implementation 'com.github.bumptech.glide:glide:4.12.0'
+
+    //navigation
+    implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
+    implementation "androidx.navigation:navigation-ui-ktx:2.3.5"
+    implementation 'com.google.android.material:material:1.4.0'
+
+    //ListenableFuture
+    implementation "androidx.work:work-runtime-ktx:2.1.0"
+    implementation 'com.google.guava:guava:28.0-android'
+
+//    def kotlin_version = "1.5.20"
+//    //kotlin自动引用xml
+//    implementation 'com.android.tools.build:gradle:2.2.0'
+//    implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//    //自动寻找ID
+//    //noinspection GradleDependency
+//    implementation "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
 }

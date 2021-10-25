@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/service_main_activity_nav"
+    app:startDestination="@id/cameraMainFragment">
+    <fragment
+        android:id="@+id/cameraMainFragment"
+        android:name="com.jube.androiddemo.Service.Camera.CameraMainFragment"
+        android:label="CameraMainFragment" />
+
+    <fragment
+        android:id="@+id/camera2MainFragment"
+        android:name="com.jube.androiddemo.Service.Camera.Camera2.Camera2MainFragment"
+        android:label="Camera2MainFragment" />
+    <fragment
+        android:id="@+id/camera2BaseDemoFragment"
+        android:name="com.jube.androiddemo.Service.Camera.Camera2.Camera2BaseDemoFragment"
+        android:label="Camera2BaseDemoFragment"
+        tools:layout="@layout/camera2_base_demo_fragment"
+        />
+
+</navigation>

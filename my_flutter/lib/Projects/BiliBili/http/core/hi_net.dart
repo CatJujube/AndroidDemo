@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter/Projects/BiliBili/http/core/hi_adpter.dart';
 import 'package:my_flutter/Projects/BiliBili/http/core/hi_error.dart';
+import 'package:my_flutter/Projects/BiliBili/http/core/mock_adpter.dart';
 import 'package:my_flutter/Projects/BiliBili/http/request/base_request.dart';
 
 class HiNet{
@@ -36,14 +37,14 @@ class HiNet{
     switch(status){
       case 200:       ///ok
         return result;
-      case 401:       ///
+      case 401:       ///需要登陆
         NeedLogin();
         break;
-      case 403:
+      case 403:       ///需要权限
         NeedAuth(result.toString(),data: result);
         break;
       default:
-        throw HiNetError(status, result.toString(),data: result);
+        throw HiNetError(status!, result.toString(),data: result);
     }
     printlog(result);
     return result;
@@ -54,7 +55,8 @@ class HiNet{
     printlog('method:${request.httpMethod()}');
     request.addHeader("token", "123");
     printlog('header:${request.header}');
-    return Future.value({'statusCode':200,'data':{"code":0,"message":"success"}});
+    HiNetAdapter adapter = MockAdpter();
+    return adapter.send(request);
   }
 
   void printlog(log){

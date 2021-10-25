@@ -6,17 +6,10 @@ abstract class HiNetAdapter{
 }
 
 class HiNetResponse<T> {
-  HiNetResponse(
-       {this.data,
-        this.request,
-        this.statusCode:0,
-        this.message:"",
-        this.extra});
-
   T? data;
   BaseRequest? request;
-  int statusCode;
-  String message;
+  int? statusCode;
+  String? message;
   dynamic extra;
 
   @override
@@ -26,4 +19,6 @@ class HiNetResponse<T> {
     }
     return data.toString();
   }
+
+  HiNetResponse({this.data, this.request, this.statusCode, this.message, this.extra});
 }

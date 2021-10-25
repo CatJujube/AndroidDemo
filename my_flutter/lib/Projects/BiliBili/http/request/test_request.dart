@@ -15,5 +15,4 @@ class TestRequest extends BaseRequest{
   String path() {
     return 'uapi/test/test';
   }
-
 }

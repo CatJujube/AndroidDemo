@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widgets_main_activity_nav"
+    app:startDestination="@id/widgetsMainFragment">
+
+    <fragment
+        android:id="@+id/widgetsMainFragment"
+        android:name="com.jube.androiddemo.Widgets.WidgetsMainFragment.WidgetsMainFragment"
+        android:label="fragment_widgets_main"
+        tools:layout="@layout/fragment_widgets_main" />
+    <fragment
+        android:id="@+id/dialogFragment"
+        android:name="com.jube.androiddemo.Widgets.Dialog.DialogFragment"
+        android:label="fragment_dialog"
+        tools:layout="@layout/fragment_dialog" />
+    <fragment
+        android:id="@+id/bottomSheetFragment"
+        android:name="com.jube.androiddemo.Widgets.Dialog.BottomSheetFragment.BottomSheetFragment"
+        android:label="BottomSheetFragment" />
+    <fragment
+        android:id="@+id/relativelayoutFragment"
+        android:name="com.jube.androiddemo.Widgets.Layouts.RelativelayoutFragment"
+        android:label="fragment_relativelayout"
+        tools:layout="@layout/fragment_relativelayout" />
+    <fragment
+        android:id="@+id/layoutMainFragment"
+        android:name="com.jube.androiddemo.Widgets.Layouts.LayoutMainFragment"
+        android:label="LayoutMainFragment" />
+    <fragment
+        android:id="@+id/frameLayoutFragment"
+        android:name="com.jube.androiddemo.Widgets.Layouts.FrameLayoutFragment"
+        android:label="fragment_frame_layout"
+        tools:layout="@layout/fragment_frame_layout" />
+
+
+</navigation>

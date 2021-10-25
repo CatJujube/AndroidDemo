@@ -21,6 +21,7 @@ import com.jube.androiddemo.Demo.extendframelayout.ExtendFrameLayoutMainActivity
 import com.jube.androiddemo.DragAndDraw.DragAndDrawActivity
 import com.jube.androiddemo.OpenGLESDemos.OpenglEsMainActivity
 import com.jube.androiddemo.PhotoGallery.PhotoGalleryActivity
+import com.jube.androiddemo.Service.ServiceMainActivity
 import com.jube.androiddemo.Widgets.WidgetsMainActivity
 
 //import io.flutter.embedding.android.FlutterActivity
@@ -56,15 +57,19 @@ class MainActivity : AppCompatActivity() {
             override fun onClick() {
                 Log.i(TAG,"Widgets is clicked!")
                 Intent(mContext, WidgetsMainActivity::class.java).apply { startActivity(this) }
-            }
-        }))
+            }}))
+
+        mDataList?.add(HomePageItem("Services", object :HomePageItem.HomePageItemCallback{
+            override fun onClick() {
+                Log.i(TAG,"Services is clicked!")
+                Intent(mContext, ServiceMainActivity::class.java).apply { startActivity(this) }
+            }}))
 
         mDataList?.add(HomePageItem("CameraX Demos", object :HomePageItem.HomePageItemCallback{
             override fun onClick() {
                 Log.i(TAG,"<<CameraX>> is clicked!")
                 Intent(mContext, CameraXMainActivity::class.java).apply { startActivity(this) }
-            }
-        }))
+            }}))
 
         mDataList?.add(HomePageItem("Parcelable Demo", object :HomePageItem.HomePageItemCallback{
             override fun onClick() {
