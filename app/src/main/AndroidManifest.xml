@@ -10,8 +10,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature android:name="android.hardware.camera.any" />
-
+    <!-- Permission declarations -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.raw" android:required="false" />
 
     <application
         android:name=".Criminallntent.CriminalRoom.CriminalIntentApplication"
@@ -21,6 +22,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity
+            android:name=".Widgets.FragmentNav.FragmentNavMainActivity"
+            android:exported="true" />
         <activity
             android:name=".Service.ServiceMainActivity"
             android:exported="true" />

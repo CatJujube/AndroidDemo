@@ -1,5 +1,6 @@
 package com.jube.androiddemo.Widgets.WidgetsMainFragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -10,6 +11,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jube.androiddemo.R
+import com.jube.androiddemo.Widgets.FragmentNav.FragmentNavMainActivity
 
 class WidgetsMainFragment : Fragment() {
     private var mView:View?=null
@@ -66,6 +68,15 @@ class WidgetsMainFragment : Fragment() {
                 mView?.let { Navigation.findNavController(it).navigate(R.id.layoutMainFragment) }
             }
         }))
+
+        mDataList?.add(WidgetsMainFragmentItem("Fragment Navigation",object:WidgetsMainFragmentItem.IClickCallback{
+            override fun click() {
+                Log.i(TAG," Dialog is clicked")
+                val intent = Intent(context,FragmentNavMainActivity::class.java)
+                startActivity(intent)
+            }
+        }))
+
     }
 }
 

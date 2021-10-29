@@ -1,83 +1,114 @@
 package com.jube.androiddemo.Service.Camera.Camera2
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.hardware.camera2.params.StreamConfigurationMap
 import android.media.Image
 import android.media.ImageReader
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
 import android.view.*
+import android.widget.ImageButton
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.drawable.toDrawable
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.jube.androiddemo.R
 import com.jube.androiddemo.Service.ServiceMainActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.Closeable
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.lang.Exception
 import java.nio.ByteBuffer
+import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.TimeoutException
+import java.util.zip.Inflater
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class Camera2BaseDemoFragment: Fragment() {
     companion object{
         const val TAG = "Camera2BaseDemoFragment_Log"
-    }
+        private const val IMAGE_BUFFER_SIZE: Int = 3
 
-    private lateinit var mCameraManager:CameraManager
-    private lateinit var mImageReader:ImageReader
-    private var mPreviewSize:Size = Size(1920,1080)
-    private lateinit var mImageHandler: Handler
-    private val mImageAvailableListener:ImageReader.OnImageAvailableListener = object :ImageReader.OnImageAvailableListener {
-        override fun onImageAvailable(reader: ImageReader?) {
-            val image: Image? = reader?.acquireNextImage()
-            Log.d(TAG, "##### onFrame: " + image?.planes)
-            image?.close()
+        private const val IMAGE_CAPTURE_TIMEOUT_MILLIS: Long = 5000
+        const val FLAGS_FULLSCREEN =
+            View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                    View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+
+        /** Milliseconds used for UI animations */
+        const val ANIMATION_FAST_MILLIS = 50L
+        const val ANIMATION_SLOW_MILLIS = 100L
+        private const val IMMERSIVE_FLAG_TIMEOUT = 500L
+
+        data class CombinedCaptureResult(
+            val image: Image,
+            val metadata: CaptureResult,
+            val orientation: Int,
+            val format: Int
+        ) : Closeable {
+            override fun close() = image.close()
+        }
+
+        private fun createFile(context: Context, extension: String): File {
+            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+            return File(context.filesDir, "IMG_${sdf.format(Date())}.$extension")
         }
     }
-    private val mTextureView: TextureView? = view?.findViewById(R.id.previewContainer)
-    private lateinit var mCameraId:String
-    private val mStateCallback:CameraDevice.StateCallback = object:CameraDevice.StateCallback(){
-        override fun onOpened(camera: CameraDevice) {
-            setUpImageReader()
-            val imageReaderSurface:Surface = mImageReader.surface
-            mCaptureRequestBuilder?.addTarget(imageReaderSurface)
-            startPreview()
-        }
 
-        override fun onDisconnected(camera: CameraDevice) {
-        }
-
-        override fun onError(camera: CameraDevice, error: Int) {
-        }
+    private val cameraManager: CameraManager by lazy {
+        val context = requireContext().applicationContext
+        context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
-    private var mSurfaceTexture: SurfaceTexture? = null
-    private var mSurface: Surface? = null
-    private var mCaptureRequestBuilder:CaptureRequest.Builder? = null
-    private var mCameraDevice:CameraDevice? = null
-    private var mCaptureRequest:CaptureRequest? = null
-    private var mPreviewSession:CameraCaptureSession? = null
-    private var mSessionCaptureCallback: CameraCaptureSession.CaptureCallback? = null
+    private val characteristics: CameraCharacteristics by lazy {
+        cameraManager.getCameraCharacteristics(cameraId)
+    }
+    private lateinit var imageReader: ImageReader
+    private val cameraThread = HandlerThread("CameraThread").apply { start() }
+    private val cameraHandler = Handler(cameraThread.looper)
+    private val imageReaderThread = HandlerThread("imageReaderThread").apply { start() }
+    private val imageReaderHandler = Handler(imageReaderThread.looper)
+    private lateinit var camera: CameraDevice
+    private lateinit var session: CameraCaptureSession
+    private lateinit var relativeOrientation: OrientationLiveData
+    private lateinit var cameraId:String
+    private var pixelFormat:Int=0
+    private var mCameraFacing = CameraCharacteristics.LENS_FACING_BACK        //默认使用后置摄像头
 
 
-    private val mTextureListener:TextureView.SurfaceTextureListener = object :TextureView.SurfaceTextureListener{
-        override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-            /**当SurfaceTexture可用的时候，设置相机参数并打开相机*/
-            setUpCamera(width,height)
-            openCamera()
-        }
 
-        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
-        }
-
-        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
-            return true
-        }
-
-        override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
+    private var mCaptureButton:ImageButton? = null
+    private var mViewFinder:AutoFitSurfaceView? = null
+    private var overlay:View?=null
+    private val animationTask: Runnable by lazy {
+        Runnable {
+            // Flash white animation
+            overlay?.background = Color.argb(150, 255, 255, 255).toDrawable()
+            // Wait for ANIMATION_FAST_MILLIS
+            overlay?.postDelayed({
+                // Remove white flash animation
+                overlay?.background = null
+            }, ANIMATION_FAST_MILLIS)
         }
     }
 
@@ -86,121 +117,330 @@ class Camera2BaseDemoFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.i(ServiceMainActivity.TAG,"Camera2BaseDemoFragment")
-        return inflater.inflate(R.layout.camera2_base_demo_fragment, container, false)
+        val view = inflater.inflate(R.layout.camera2_base_demo_fragment, container, false)
+        mCaptureButton = view.findViewById(R.id.capture_button)
+        mViewFinder = view.findViewById(R.id.view_finder)
+        return view
     }
 
-    /**
-     * @brief 设置相机参数
-     * 为了更好地预览，我们根据TextureView的尺寸设置预览尺寸，Camera2中使用CameraManager来管理摄像头
-     */
-    private fun setUpCamera(width:Int,height:Int){
-        prepareCameraManager()
-        try {
-            /**遍历所有摄像头**/
-            for(cameraId in mCameraManager.cameraIdList){
-                val characteristics = mCameraManager.getCameraCharacteristics(cameraId)
-                val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
-                /**默认打开后置摄像头**/
-                if(null != facing && facing == CameraCharacteristics.LENS_FACING_FRONT) continue
-                /**获取StreamConfigurationMap,管理摄像头支持的所有输出格式和尺寸**/
-                val map: StreamConfigurationMap? = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                /**根据TextureView的尺寸设置预览尺寸**/
-//                mPreviewSize = getOptimalSize(map!!.getOutputSizes(SurfaceTexture::class.java), width, height)
-                mCameraId = cameraId
-                break
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setUpCamera()
+        mCaptureButton?.setOnApplyWindowInsetsListener { v, insets ->
+            v.translationX = (-insets.systemWindowInsetRight).toFloat()
+            v.translationY = (-insets.systemWindowInsetBottom).toFloat()
+            insets.consumeSystemWindowInsets()
+        }
+        mViewFinder?.holder?.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
+
+            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) = Unit
+
+            override fun surfaceCreated(holder: SurfaceHolder) {
+                // Selects appropriate preview size and configures view finder
+                val previewSize = mViewFinder?.display?.let {
+                    getPreviewOutputSize(
+                        it,
+                        characteristics,
+                        SurfaceHolder::class.java
+                    )
+                }
+                Log.d(TAG, "View finder size: ${mViewFinder?.width} x ${mViewFinder?.height}")
+                Log.d(TAG, "Selected preview size: $previewSize")
+                mViewFinder?.setAspectRatio(
+                    previewSize!!.width,
+                    previewSize!!.height
+                )
+
+                // To ensure that size is set, initialize camera in the view's thread
+                view.post { initializeCamera() }
             }
-        }catch (e:Exception){
-            e.message?.let { Log.e(TAG, it) }
+        })
+    }
+
+    private fun initializeCamera() = lifecycleScope.launch(Dispatchers.Main) {
+        camera = openCamera(cameraManager, cameraId, cameraHandler)
+
+        val size = characteristics.get(
+            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+            .getOutputSizes(pixelFormat).maxByOrNull { it.height * it.width }!!
+        imageReader = ImageReader.newInstance(
+            size.width, size.height, pixelFormat, IMAGE_BUFFER_SIZE)
+
+        val targets = listOf(mViewFinder?.holder?.surface, imageReader.surface)
+
+        session = createCaptureSession(camera, targets as List<Surface>, cameraHandler)
+
+        val captureRequest = camera.createCaptureRequest(
+            CameraDevice.TEMPLATE_PREVIEW).apply { mViewFinder?.holder?.surface?.let { addTarget(it) } }
+
+        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+
+        mCaptureButton?.setOnClickListener {
+            Log.i(TAG,"mCaptureButton is clicked!")
+
+            it.isEnabled = false
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                takePhoto().use { result ->
+                    Log.d(TAG, "Result received: $result")
+
+                    val output = saveResult(result)
+                    Log.d(TAG, "Image saved: ${output.absolutePath}")
+
+                    if (output.extension == "jpg") {
+                        val exif = ExifInterface(output.absolutePath)
+                        exif.setAttribute(
+                            ExifInterface.TAG_ORIENTATION, result.orientation.toString())
+                        exif.saveAttributes()
+                        Log.d(TAG, "EXIF metadata saved: ${output.absolutePath}")
+                    }
+
+//                    lifecycleScope.launch(Dispatchers.Main) {
+//                        navController.navigate(CameraFragmentDirections
+//                            .actionCameraToJpegViewer(output.absolutePath)
+//                            .setOrientation(result.orientation)
+//                            .setDepth(
+//                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+//                                    result.format == ImageFormat.DEPTH_JPEG))
+//                    }
+                }
+
+                it.post { it.isEnabled = true }
+            }
         }
     }
 
-    /**
-     * @brief 打开相机
-     */
-    private fun openCamera(){
-        /**获取摄像头的CameraManager**/
-        val manager:CameraManager = activity?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        /**检查权限**/
-        try{
-            if(context?.let { ActivityCompat.checkSelfPermission(it, Manifest.permission.CAMERA) } !=PackageManager.PERMISSION_GRANTED){
-                return
+    @SuppressLint("MissingPermission")
+    private suspend fun openCamera(
+        manager: CameraManager,
+        cameraId: String,
+        handler: Handler? = null
+    ): CameraDevice = suspendCancellableCoroutine { cont ->
+        manager.openCamera(cameraId, object : CameraDevice.StateCallback() {
+            override fun onOpened(device: CameraDevice) = cont.resume(device)
+
+            override fun onDisconnected(device: CameraDevice) {
+                Log.w(TAG, "Camera $cameraId has been disconnected")
+                requireActivity().finish()
             }
-            /**打开相机，第一个参数指示打开哪个摄像头，第二个参数stateCallback为相机的状态回调接口，第三个参数用来确定Callback在哪个线程执行，为null的话就在当前线程执行**/
-            manager.openCamera(mCameraId, mStateCallback, null)
-        }catch (e:Exception){
-            e.message?.let { Log.e(TAG, it) }
-        }
+
+            override fun onError(device: CameraDevice, error: Int) {
+                val msg = when (error) {
+                    ERROR_CAMERA_DEVICE -> "Fatal (device)"
+                    ERROR_CAMERA_DISABLED -> "Device policy"
+                    ERROR_CAMERA_IN_USE -> "Camera in use"
+                    ERROR_CAMERA_SERVICE -> "Fatal (service)"
+                    ERROR_MAX_CAMERAS_IN_USE -> "Maximum cameras in use"
+                    else -> "Unknown"
+                }
+                val exc = RuntimeException("Camera $cameraId error: ($error) $msg")
+                Log.e(TAG, exc.message, exc)
+                if (cont.isActive) cont.resumeWithException(exc)
+            }
+        }, handler)
     }
 
-    /**
-     * @brief 开始预览
-     */
+    private suspend fun createCaptureSession(
+        device: CameraDevice,
+        targets: List<Surface>,
+        handler: Handler? = null
+    ): CameraCaptureSession = suspendCoroutine { cont ->
+        device.createCaptureSession(targets, object : CameraCaptureSession.StateCallback() {
 
-    private fun startPreview(){
-        mSurfaceTexture = mTextureView?.surfaceTexture
-        mSurfaceTexture?.setDefaultBufferSize(mPreviewSize.width,mPreviewSize.height)
-        mSurface = Surface(mSurfaceTexture)
-        try {
-            mCaptureRequestBuilder = mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-            mCaptureRequestBuilder?.addTarget(mSurface!!)
-            mCameraDevice?.createCaptureSession(listOf(mSurface),object :CameraCaptureSession.StateCallback(){
-                override fun onConfigured(session: CameraCaptureSession) {
-                    try {
-                        mCaptureRequest = mCaptureRequestBuilder?.build()
-                        mPreviewSession = session
-                        mCaptureRequest?.let { mPreviewSession!!.setRepeatingRequest(it,mSessionCaptureCallback,null) }
-                    }catch (e:CameraAccessException){
-                        e.message?.let { Log.e(TAG, it) }
+            override fun onConfigured(session: CameraCaptureSession) = cont.resume(session)
+
+            override fun onConfigureFailed(session: CameraCaptureSession) {
+                val exc = RuntimeException("Camera ${device.id} session configuration failed")
+                Log.e(TAG, exc.message, exc)
+                cont.resumeWithException(exc)
+            }
+        }, handler)
+    }
+
+    private suspend fun takePhoto():
+            CombinedCaptureResult = suspendCoroutine { cont ->
+
+        @Suppress("ControlFlowWithEmptyBody")
+        while (imageReader.acquireNextImage() != null) {
+        }
+
+        val imageQueue = ArrayBlockingQueue<Image>(IMAGE_BUFFER_SIZE)
+        imageReader.setOnImageAvailableListener({ reader ->
+            val image = reader.acquireNextImage()
+            Log.d(TAG, "Image available in queue: ${image.timestamp}")
+            imageQueue.add(image)
+        }, imageReaderHandler)
+
+        val captureRequest = session.device.createCaptureRequest(
+            CameraDevice.TEMPLATE_STILL_CAPTURE).apply { addTarget(imageReader.surface) }
+        session.capture(captureRequest.build(), object : CameraCaptureSession.CaptureCallback() {
+
+            override fun onCaptureStarted(
+                session: CameraCaptureSession,
+                request: CaptureRequest,
+                timestamp: Long,
+                frameNumber: Long) {
+                super.onCaptureStarted(session, request, timestamp, frameNumber)
+                mViewFinder?.post(animationTask)
+            }
+
+            override fun onCaptureCompleted(
+                session: CameraCaptureSession,
+                request: CaptureRequest,
+                result: TotalCaptureResult) {
+                super.onCaptureCompleted(session, request, result)
+                val resultTimestamp = result.get(CaptureResult.SENSOR_TIMESTAMP)
+                Log.d(TAG, "Capture result received: $resultTimestamp")
+
+                val exc = TimeoutException("Image dequeuing took too long")
+                val timeoutRunnable = Runnable { cont.resumeWithException(exc) }
+                imageReaderHandler.postDelayed(timeoutRunnable, IMAGE_CAPTURE_TIMEOUT_MILLIS)
+
+                @Suppress("BlockingMethodInNonBlockingContext")
+                lifecycleScope.launch(cont.context) {
+                    while (true) {
+                        val image = imageQueue.take()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            image.format != ImageFormat.DEPTH_JPEG &&
+                            image.timestamp != resultTimestamp) continue
+                        Log.d(TAG, "Matching image dequeued: ${image.timestamp}")
+
+                        imageReaderHandler.removeCallbacks(timeoutRunnable)
+                        imageReader.setOnImageAvailableListener(null, null)
+
+                        while (imageQueue.size > 0) {
+                            imageQueue.take().close()
+                        }
+
+                        val rotation = relativeOrientation.value ?: 0
+                        val mirrored = characteristics.get(CameraCharacteristics.LENS_FACING) ==
+                                CameraCharacteristics.LENS_FACING_FRONT
+                        val exifOrientation = computeExifOrientation(rotation, mirrored)
+
+                        cont.resume(CombinedCaptureResult(
+                            image, result, exifOrientation, imageReader.imageFormat))
                     }
                 }
-                override fun onConfigureFailed(session: CameraCaptureSession) {
+            }
+        }, cameraHandler)
+    }
+
+    private suspend fun saveResult(result: CombinedCaptureResult): File = suspendCoroutine { cont ->
+        when (result.format) {
+
+            // When the format is JPEG or DEPTH JPEG we can simply save the bytes as-is
+            ImageFormat.JPEG, ImageFormat.DEPTH_JPEG -> {
+                val buffer = result.image.planes[0].buffer
+                val bytes = ByteArray(buffer.remaining()).apply { buffer.get(this) }
+                try {
+                    val output = createFile(requireContext(), "jpg")
+                    FileOutputStream(output).use { it.write(bytes) }
+                    cont.resume(output)
+                } catch (exc: IOException) {
+                    Log.e(TAG, "Unable to write JPEG image to file", exc)
+                    cont.resumeWithException(exc)
                 }
-            },null)
-        }catch (e:Exception){
-            e.message?.let { Log.e(TAG, it) }
+            }
+
+            // When the format is RAW we use the DngCreator utility library
+            ImageFormat.RAW_SENSOR -> {
+                val dngCreator = DngCreator(characteristics, result.metadata)
+                try {
+                    val output = createFile(requireContext(), "dng")
+                    FileOutputStream(output).use { dngCreator.writeImage(it, result.image) }
+                    cont.resume(output)
+                } catch (exc: IOException) {
+                    Log.e(TAG, "Unable to write DNG image to file", exc)
+                    cont.resumeWithException(exc)
+                }
+            }
+
+            // No other formats are supported by this sample
+            else -> {
+                val exc = RuntimeException("Unknown image format: ${result.image.format}")
+                Log.e(TAG, exc.message, exc)
+                cont.resumeWithException(exc)
+            }
         }
     }
 
-    private fun setUpImageReader(){
-        mImageReader = ImageReader.newInstance(mPreviewSize.width,mPreviewSize.height,ImageFormat.JPEG,2)
-        mImageReader.setOnImageAvailableListener(object :ImageReader.OnImageAvailableListener{
-            override fun onImageAvailable(reader: ImageReader?) {
-                val image:Image = reader!!.acquireLatestImage()
-                val buffer:ByteBuffer = image.planes[0].buffer
-                val data:ByteArray = ByteArray(buffer.remaining())
-                buffer.get(data)
-                image.close()
+    override fun onStop() {
+        super.onStop()
+        try {
+            camera.close()
+        } catch (exc: Throwable) {
+            Log.e(TAG, "Error closing camera", exc)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraThread.quitSafely()
+        imageReaderThread.quitSafely()
+    }
+
+    private fun setUpCamera(){
+        val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val cameraList = enumerateCameras(cameraManager)
+        for(item:FormatItem in cameraList){
+            Log.i(TAG,"camera title ${item.title}")
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun enumerateCameras(cameraManager: CameraManager): List<FormatItem> {
+        val availableCameras: MutableList<FormatItem> = mutableListOf()
+
+        // Get list of all compatible cameras
+//        val cameraIds = cameraManager.cameraIdList.filter {
+//            val characteristics = cameraManager.getCameraCharacteristics(it)
+//            val capabilities = characteristics.get(
+//                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
+//            capabilities?.contains(
+//                CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE) ?: false
+//        }
+        val cameraIds = cameraManager.cameraIdList
+        cameraIds.forEach { id ->
+            val characteristics = cameraManager.getCameraCharacteristics(id)
+            val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
+            if(facing == mCameraFacing){
+                cameraId = id
             }
-        },null)
+            pixelFormat = ImageFormat.JPEG
+            val orientation = lensOrientationString(characteristics.get(CameraCharacteristics.LENS_FACING)!!)
+
+            val capabilities = characteristics.get(
+                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
+            val outputFormats = characteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!.outputFormats
+
+            availableCameras.add(FormatItem(
+                "$orientation JPEG ($id)", id, ImageFormat.JPEG))
+
+            if (capabilities.contains(
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) &&
+                outputFormats.contains(ImageFormat.RAW_SENSOR)) {
+                availableCameras.add(FormatItem(
+                    "$orientation RAW ($id)", id, ImageFormat.RAW_SENSOR))
+            }
+
+            if (capabilities.contains(
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) &&
+                outputFormats.contains(ImageFormat.DEPTH_JPEG)) {
+                availableCameras.add(FormatItem(
+                    "$orientation DEPTH ($id)", id, ImageFormat.DEPTH_JPEG))
+            }
+        }
+        return availableCameras
     }
 
-    override fun onResume() {
-        super.onResume()
-        mTextureView?.surfaceTextureListener = mTextureListener
+    private fun lensOrientationString(value: Int) = when(value) {
+        CameraCharacteristics.LENS_FACING_BACK -> "Back"
+        CameraCharacteristics.LENS_FACING_FRONT -> "Front"
+        CameraCharacteristics.LENS_FACING_EXTERNAL -> "External"
+        else -> "Unknown"
     }
 
-    //获取ImageManager
-    private fun prepareCameraManager(){
-        mCameraManager = activity?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-    }
-
-
-    /**
-     * @brief ImageReader是获取图像数据的重要途径，通过它可以获取到不同格式的图像数据，例如JPEG、YUV、RAW等。通过ImageReader.newInstance(int width, int height, int format, int maxImages)创建ImageReader对象，有4个参数：
-     * param width：图像数据的宽度
-     * param height：图像数据的高度
-     * param format: format：图像数据的格式，例如ImageFormat.JPEG，ImageFormat.YUV_420_888等
-     * param maxImages: 最大Image个数，Image对象池的大小，指定了能从ImageReader获取Image对象的最大值，过多获取缓冲区可能导致OOM，所以最好按照最少的需要去设置这个值
-     * oth: ImageReader.OnImageAvailableListener：有新图像数据的回调
-     * oth: acquireLatestImage()：从ImageReader的队列里面，获取最新的Image，删除旧的，如果没有可用的Image，返回null
-     * oth: acquireNextImage()：获取下一个最新的可用Image，没有则返回null
-     * oth: close()：释放与此ImageReader关联的所有资源
-     * oth: getSurface()：获取为当前ImageReader生成Image的Surface
-     */
-    private fun prepareImageReader(){
-        mImageReader = ImageReader.newInstance(mPreviewSize.width,mPreviewSize.height,ImageFormat.YUV_420_888,1)
-        mImageReader.setOnImageAvailableListener(mImageAvailableListener,mImageHandler)
-    }
-
+    private data class FormatItem(val title: String, val cameraId: String, val format: Int)
 }

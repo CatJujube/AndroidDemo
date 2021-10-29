@@ -55,7 +55,7 @@ class CameraX :TextureView{
 
     companion object{
         const val TAG = "CameraX_Log"
-        const val usingPreviewView = false
+        const val usingPreviewView = true
     }
 
     constructor(context: Context):super(context){
@@ -70,28 +70,14 @@ class CameraX :TextureView{
         this.mCameraPreview = preview
     }
 
-    @SuppressLint("RestrictedApi", "UnsafeOptInUsageError")
     private fun bindPreview(){
         Log.i(TAG,"bindPreview")
         mPreview = Preview.Builder()
 //                    .setTargetResolution()
-            .build()
-
-        /**旋转角度，一般Preview会根据Preview.Builder.setTargetRotation(int)来设置旋转角度，当未设置时会根据Display.getRotation()的值来设置旋转角度*/
-        val rotationInfo: Int = mPreview.targetRotation
-
-        /**相机选中的预览尺寸，CameraX会根据Camera2的API在一系列尺寸中选择最适合的一个，这里返回的是选中的尺寸*/
-//        val resolutionInfo: Size = mPreview.attachedSurfaceResolution!!
-
-        /**
-         *为Preview设置一个Surface，Surface可以传入ImageReader，MediaCodec，SurfaceTexture，TextureView，其中Surface中如果传入的是SurfaceView那么旋转方向会自动适配；如果是ImageReadder，MediaCodec则应该用户负责管理旋转；
-         *在SurfaceTextViewz中可以调用SurfaceTexture.getTransformMatrix(float[])来获取原本的方向
-         *TextureView也是总处于原本的方向
-         **/
+                      .build()
         when(usingPreviewView){
             true -> {
                 mPreview.setSurfaceProvider(mCameraPreview?.surfaceProvider)
-                mPreview.targetRotation = mCameraPreview?.display?.rotation?:0 //获取旋转角度
                 Log.i(TAG,"using PreviewView init")
             }
             false -> {
@@ -157,8 +143,10 @@ class CameraX :TextureView{
         getAttachedResolution()
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private fun bindCameraControl(){
         mCameraControl = mCamera.cameraControl
+        mCameraControl.setExposureCompensationIndex(1)
     }
 
     private fun bindCameraInfo(){
@@ -215,7 +203,7 @@ class CameraX :TextureView{
 
                     override fun onError(exception: ImageCaptureException) {
                         callback.fail()
-                        Log.e(TAG,"image save error")
+                        Log.e(TAG,"image save error.${exception.message}")
                     }
                 }
             )
