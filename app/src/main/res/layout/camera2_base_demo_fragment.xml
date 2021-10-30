@@ -23,6 +23,35 @@
         android:layout_height="96dp"
         android:layout_gravity="bottom|center"
         android:scaleType="fitCenter"
-        android:background="@drawable/ic_shutter" />
+        android:background="@drawable/ic_shutter"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="20dp"
+        />
 
+    <ImageButton
+        android:id="@+id/photoContainerButton"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="bottom|right"
+        android:scaleType="fitCenter"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        />
+
+    <ImageButton
+        android:id="@+id/switchToVideoCapture"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="bottom|left"
+        android:scaleType="fitCenter"
+        android:background="@drawable/video_capture_btton_drawable"
+        android:src="@drawable/video_capture"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="30dp"
+        />
 </FrameLayout>

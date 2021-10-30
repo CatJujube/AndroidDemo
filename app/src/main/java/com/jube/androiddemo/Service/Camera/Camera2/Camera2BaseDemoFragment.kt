@@ -1,54 +1,45 @@
 package com.jube.androiddemo.Service.Camera.Camera2
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.ImageFormat
-import android.graphics.SurfaceTexture
+import android.content.Intent
+import android.graphics.*
 import android.hardware.camera2.*
-import android.hardware.camera2.params.StreamConfigurationMap
 import android.media.Image
 import android.media.ImageReader
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
+import android.net.Uri
+import android.os.*
+import android.provider.MediaStore
 import android.util.Log
-import android.util.Size
 import android.view.*
 import android.widget.ImageButton
-import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.jube.androiddemo.R
-import com.jube.androiddemo.Service.ServiceMainActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.io.Closeable
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.lang.Exception
-import java.nio.ByteBuffer
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeoutException
-import java.util.zip.Inflater
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.max
+
 
 class Camera2BaseDemoFragment: Fragment() {
     companion object{
         const val TAG = "Camera2BaseDemoFragment_Log"
         private const val IMAGE_BUFFER_SIZE: Int = 3
-
+        private const val DOWNSAMPLE_SIZE: Int = 1024  // 1MP
+        const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+        const val PHOTO_EXTENSION = ".jpg"
         private const val IMAGE_CAPTURE_TIMEOUT_MILLIS: Long = 5000
         const val FLAGS_FULLSCREEN =
             View.SYSTEM_UI_FLAG_LOW_PROFILE or
@@ -70,12 +61,37 @@ class Camera2BaseDemoFragment: Fragment() {
             override fun close() = image.close()
         }
 
+
         private fun createFile(context: Context, extension: String): File {
-            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-            return File(context.filesDir, "IMG_${sdf.format(Date())}.$extension")
+//            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+//            return File(context.filesDir, "IMG_${sdf.format(Date())}.$extension")
+            return getPictureSaveFile(context,extension)
+        }
+
+        private fun getPictureSaveFile(context: Context,extension: String): File {
+            return File(getPictureOutputDirectory(context), SimpleDateFormat(FILENAME_FORMAT, Locale.CHINA).format(System.currentTimeMillis()) + extension)
+        }
+
+        private fun getPictureOutputDirectory(context: Context):File{
+            val appContext = context.applicationContext
+            val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
+                File(it,appContext.resources.getString(R.string.app_name)).apply {
+                    mkdirs()
+                }
+            }
+            return if (mediaDir!=null && mediaDir.exists()) mediaDir else appContext.filesDir
         }
     }
 
+    private val bitmapOptions = BitmapFactory.Options().apply {
+        inJustDecodeBounds = false
+        // Keep Bitmaps at less than 1 MP
+        if (max(outHeight, outWidth) > DOWNSAMPLE_SIZE) {
+            val scaleFactorX = outWidth / DOWNSAMPLE_SIZE + 1
+            val scaleFactorY = outHeight / DOWNSAMPLE_SIZE + 1
+            inSampleSize = max(scaleFactorX, scaleFactorY)
+        }
+    }
     private val cameraManager: CameraManager by lazy {
         val context = requireContext().applicationContext
         context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -94,10 +110,16 @@ class Camera2BaseDemoFragment: Fragment() {
     private lateinit var cameraId:String
     private var pixelFormat:Int=0
     private var mCameraFacing = CameraCharacteristics.LENS_FACING_BACK        //默认使用后置摄像头
+    private val bitmapTransformation: Matrix by lazy { decodeExifOrientation(mOrientation) }
+    private var mOrientation:Int = 0 ;
+
 
 
 
     private var mCaptureButton:ImageButton? = null
+    private var mVideoCaptureButton:ImageButton? = null
+    private var mPhotoGallaryButton:ImageButton? = null
+
     private var mViewFinder:AutoFitSurfaceView? = null
     private var overlay:View?=null
     private val animationTask: Runnable by lazy {
@@ -120,6 +142,8 @@ class Camera2BaseDemoFragment: Fragment() {
         val view = inflater.inflate(R.layout.camera2_base_demo_fragment, container, false)
         mCaptureButton = view.findViewById(R.id.capture_button)
         mViewFinder = view.findViewById(R.id.view_finder)
+        mVideoCaptureButton = view.findViewById(R.id.switchToVideoCapture)
+        mPhotoGallaryButton = view.findViewById(R.id.photoContainerButton)
         return view
     }
 
@@ -156,6 +180,12 @@ class Camera2BaseDemoFragment: Fragment() {
                 view.post { initializeCamera() }
             }
         })
+
+        relativeOrientation = OrientationLiveData(requireContext(), characteristics).apply {
+            observe(viewLifecycleOwner, Observer { orientation  ->
+                Log.d(TAG, "Orientation changed: $orientation")
+            })
+        }
     }
 
     private fun initializeCamera() = lifecycleScope.launch(Dispatchers.Main) {
@@ -196,19 +226,39 @@ class Camera2BaseDemoFragment: Fragment() {
                         Log.d(TAG, "EXIF metadata saved: ${output.absolutePath}")
                     }
 
-//                    lifecycleScope.launch(Dispatchers.Main) {
-//                        navController.navigate(CameraFragmentDirections
-//                            .actionCameraToJpegViewer(output.absolutePath)
-//                            .setOrientation(result.orientation)
-//                            .setDepth(
-//                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-//                                    result.format == ImageFormat.DEPTH_JPEG))
-//                    }
+                    mOrientation = result.orientation
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Log.d(TAG,"image absolute path:${output.absolutePath}")
+                        val imageByteArray = loadInputBuffer(output.absolutePath)
+                        val bitmap = decodeBitmap(imageByteArray,0,imageByteArray.size)
+                        context?.let { it1 -> saveImage(bitmap,".jpg") }  //保存图片到系统相册
+                        mPhotoGallaryButton?.setImageBitmap(bitmap)
+                    }
                 }
 
                 it.post { it.isEnabled = true }
             }
         }
+    }
+
+    private fun loadInputBuffer(filePath:String): ByteArray {
+        val inputFile = File(filePath)
+        return BufferedInputStream(inputFile.inputStream()).let { stream ->
+            ByteArray(stream.available()).also {
+                stream.read(it)
+                stream.close()
+            }
+        }
+    }
+
+    private fun decodeBitmap(buffer: ByteArray, start: Int, length: Int): Bitmap {
+
+        // Load bitmap from given buffer
+        val bitmap = BitmapFactory.decodeByteArray(buffer, start, length, bitmapOptions)
+
+        // Transform bitmap orientation using provided metadata
+        return Bitmap.createBitmap(
+            bitmap, 0, 0, bitmap.width, bitmap.height, bitmapTransformation, true)
     }
 
     @SuppressLint("MissingPermission")
@@ -326,6 +376,39 @@ class Camera2BaseDemoFragment: Fragment() {
         }, cameraHandler)
     }
 
+    fun saveImage(bmp: Bitmap,extension: String): String? {
+        val appDir = File(Environment.getExternalStorageDirectory() ,
+            File.separator.toString() + Environment.DIRECTORY_DCIM + File.separator.toString() + "Camera" + File.separator)
+        if (!appDir.exists()) {
+            appDir.mkdir()
+        }
+        val fileName = SimpleDateFormat(FILENAME_FORMAT, Locale.CHINA).format(System.currentTimeMillis())+extension;
+        val file = File(appDir, fileName)
+        try {
+            val fos = FileOutputStream(file)
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.flush()
+            fos.close()
+            try {
+                MediaStore.Images.Media.insertImage(
+                    activity?.contentResolver,
+                    file.absolutePath, fileName, null
+                )
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+            }
+            // 最后通知图库更新
+            val localUri = Uri.fromFile(file)
+            val localIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, localUri)
+            activity?.sendBroadcast(localIntent)
+            return file.absolutePath
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+
     private suspend fun saveResult(result: CombinedCaptureResult): File = suspendCoroutine { cont ->
         when (result.format) {
 
@@ -337,6 +420,7 @@ class Camera2BaseDemoFragment: Fragment() {
                     val output = createFile(requireContext(), "jpg")
                     FileOutputStream(output).use { it.write(bytes) }
                     cont.resume(output)
+                    Log.d(TAG,"image save success, ptah:$output")
                 } catch (exc: IOException) {
                     Log.e(TAG, "Unable to write JPEG image to file", exc)
                     cont.resumeWithException(exc)
