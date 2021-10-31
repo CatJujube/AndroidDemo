@@ -13,11 +13,16 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.*
 import android.widget.ImageButton
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.toDrawable
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.jube.androiddemo.MainActivity
 import com.jube.androiddemo.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,17 +41,28 @@ import kotlin.math.max
 class Camera2BaseDemoFragment: Fragment() {
     companion object{
         const val TAG = "Camera2BaseDemoFragment_Log"
+        //continuous capture photo
+        /**设置连拍的次数，即点击一次拍照button连拍的次数**/
+        private const val mMaxCombo:Int = 7
+        /**曝光时间**/
+        private var mExposureTime:Long = ms2ns(0.05) //0.5ms
+        /**
+         * 使用mExposureDelta 还是 mExposureRatio，二选择其一
+         * true -> 使用mExposureRatio
+         * false -> 使用mExposureDelta
+         **/
+        private const val mUsingRatio:Boolean = true
+        /**单次拍照曝光时间的变化值**/
+        private val mExposureDelta:Long = ms2ns(0.1) //0.1ms
+        /**单次拍照曝光时间的的增长率**/
+        private const val mExposureRatio:Float = 0.1F
+
         private const val IMAGE_BUFFER_SIZE: Int = 3
         private const val DOWNSAMPLE_SIZE: Int = 1024  // 1MP
         const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-        const val PHOTO_EXTENSION = ".jpg"
         private const val IMAGE_CAPTURE_TIMEOUT_MILLIS: Long = 5000
-        const val FLAGS_FULLSCREEN =
-            View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                    View.SYSTEM_UI_FLAG_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-
+        private var mDialog:AlertDialog? = null
+        private var mDialogBuilder:AlertDialog.Builder? = null
         /** Milliseconds used for UI animations */
         const val ANIMATION_FAST_MILLIS = 50L
         const val ANIMATION_SLOW_MILLIS = 100L
@@ -61,6 +77,9 @@ class Camera2BaseDemoFragment: Fragment() {
             override fun close() = image.close()
         }
 
+        fun ms2ns(ms:Double):Long{
+            return (ms*1000000).toLong()
+        }
 
         private fun createFile(context: Context, extension: String): File {
 //            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
@@ -147,9 +166,26 @@ class Camera2BaseDemoFragment: Fragment() {
         return view
     }
 
+
+    fun openAlbum() {
+        val IMAGE_TYPE = "image/*"
+        val intent = Intent()
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = IMAGE_TYPE
+        if (Build.VERSION.SDK_INT < 19) {
+            intent.action = Intent.ACTION_GET_CONTENT
+        } else {
+            intent.action = Intent.ACTION_OPEN_DOCUMENT
+        }
+        startActivity(intent)
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUpCamera()
+
+        mPhotoGallaryButton?.setOnClickListener {
+            openAlbum()
+        }
         mCaptureButton?.setOnApplyWindowInsetsListener { v, insets ->
             v.translationX = (-insets.systemWindowInsetRight).toFloat()
             v.translationY = (-insets.systemWindowInsetBottom).toFloat()
@@ -190,53 +226,66 @@ class Camera2BaseDemoFragment: Fragment() {
 
     private fun initializeCamera() = lifecycleScope.launch(Dispatchers.Main) {
         camera = openCamera(cameraManager, cameraId, cameraHandler)
-
         val size = characteristics.get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             .getOutputSizes(pixelFormat).maxByOrNull { it.height * it.width }!!
         imageReader = ImageReader.newInstance(
             size.width, size.height, pixelFormat, IMAGE_BUFFER_SIZE)
-
         val targets = listOf(mViewFinder?.holder?.surface, imageReader.surface)
-
         session = createCaptureSession(camera, targets as List<Surface>, cameraHandler)
-
         val captureRequest = camera.createCaptureRequest(
             CameraDevice.TEMPLATE_PREVIEW).apply { mViewFinder?.holder?.surface?.let { addTarget(it) } }
-
         session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
-
         mCaptureButton?.setOnClickListener {
             Log.i(TAG,"mCaptureButton is clicked!")
-
             it.isEnabled = false
 
+            Toast.makeText(context,"正在连拍中... 连拍耗时较长，请持稳手机不要晃动，等待拍摄完成提示",Toast.LENGTH_LONG).show()
             lifecycleScope.launch(Dispatchers.IO) {
-                takePhoto().use { result ->
-                    Log.d(TAG, "Result received: $result")
-
-                    val output = saveResult(result)
-                    Log.d(TAG, "Image saved: ${output.absolutePath}")
-
-                    if (output.extension == "jpg") {
-                        val exif = ExifInterface(output.absolutePath)
-                        exif.setAttribute(
-                            ExifInterface.TAG_ORIENTATION, result.orientation.toString())
-                        exif.saveAttributes()
-                        Log.d(TAG, "EXIF metadata saved: ${output.absolutePath}")
-                    }
-
-                    mOrientation = result.orientation
+                for( index in 1..mMaxCombo){
                     lifecycleScope.launch(Dispatchers.Main) {
-                        Log.d(TAG,"image absolute path:${output.absolutePath}")
-                        val imageByteArray = loadInputBuffer(output.absolutePath)
-                        val bitmap = decodeBitmap(imageByteArray,0,imageByteArray.size)
-                        context?.let { it1 -> saveImage(bitmap,".jpg") }  //保存图片到系统相册
-                        mPhotoGallaryButton?.setImageBitmap(bitmap)
+                        Toast.makeText(context, "拍摄第${index}张照片中，请稍候...", Toast.LENGTH_LONG).show()
                     }
+                    takePhotoWrapper()
                 }
-
+                lifecycleScope.launch(Dispatchers.Main){
+                    Toast.makeText(context,"拍摄完成!",Toast.LENGTH_LONG).show()
+                }
                 it.post { it.isEnabled = true }
+            }
+        }
+    }
+
+    private suspend fun takePhotoWrapper(){
+        takePhoto().use { result ->
+            Log.d(TAG, "Result received: $result")
+            val output = saveResult(result)
+            Log.d(TAG, "Image saved: ${output.absolutePath}")
+            if (output.extension == "jpg") {
+                val exif = ExifInterface(output.absolutePath)
+                exif.setAttribute(
+                    ExifInterface.TAG_ORIENTATION, result.orientation.toString())
+                exif.saveAttributes()
+                Log.d(TAG, "EXIF metadata saved: ${output.absolutePath}")
+            }
+            mOrientation = result.orientation
+            lifecycleScope.launch(Dispatchers.Main) {
+                Log.d(TAG,"image absolute path:${output.absolutePath}")
+                val imageByteArray = loadInputBuffer(output.absolutePath)
+                val bitmap = decodeBitmap(imageByteArray,0,imageByteArray.size)
+                context?.let { it1 -> saveImage(bitmap,".jpg") }  //保存图片到系统相册
+                setGalleryThumbnail(bitmap)
+            }
+        }
+    }
+
+    private fun setGalleryThumbnail(bitmap: Bitmap) {
+        mPhotoGallaryButton?.let { photoViewButton ->
+            photoViewButton.post {
+                Glide.with(photoViewButton)
+                    .load(bitmap)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(photoViewButton)
             }
         }
     }
@@ -322,8 +371,24 @@ class Camera2BaseDemoFragment: Fragment() {
             imageQueue.add(image)
         }, imageReaderHandler)
 
-        val captureRequest = session.device.createCaptureRequest(
-            CameraDevice.TEMPLATE_STILL_CAPTURE).apply { addTarget(imageReader.surface) }
+        val captureRequest = session.device
+            .createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+            .apply {
+                set(CaptureRequest.CONTROL_AE_MODE,0)
+                set(CaptureRequest.CONTROL_MODE,0)
+                if(mUsingRatio) {
+                    set(CaptureRequest.SENSOR_EXPOSURE_TIME,
+                        mExposureTime)
+                    mExposureTime = (mExposureTime *(1+ mExposureRatio)).toLong()
+
+                }else{
+                    set(CaptureRequest.SENSOR_EXPOSURE_TIME,
+                        mExposureTime)
+                    mExposureTime += mExposureDelta
+                }
+                addTarget(imageReader.surface)
+            }
+
         session.capture(captureRequest.build(), object : CameraCaptureSession.CaptureCallback() {
 
             override fun onCaptureStarted(
@@ -382,7 +447,7 @@ class Camera2BaseDemoFragment: Fragment() {
         if (!appDir.exists()) {
             appDir.mkdir()
         }
-        val fileName = SimpleDateFormat(FILENAME_FORMAT, Locale.CHINA).format(System.currentTimeMillis())+extension;
+        val fileName = SimpleDateFormat(FILENAME_FORMAT, Locale.CHINA).format(System.currentTimeMillis())+extension
         val file = File(appDir, fileName)
         try {
             val fos = FileOutputStream(file)
@@ -397,6 +462,7 @@ class Camera2BaseDemoFragment: Fragment() {
             } catch (e: FileNotFoundException) {
                 e.printStackTrace()
             }
+            deleteFile(file) //删除一张照片防止重复
             // 最后通知图库更新
             val localUri = Uri.fromFile(file)
             val localIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, localUri)
@@ -408,6 +474,19 @@ class Camera2BaseDemoFragment: Fragment() {
         return null
     }
 
+    fun deleteFile(file: File) {
+        if (file.exists()) { // 判断文件是否存在
+            if (file.isFile) { // 判断是否是文件
+                file.delete() // delete()方法 你应该知道 是删除的意思;
+            } else if (file.isDirectory) { // 否则如果它是一个目录
+                val files = file.listFiles() // 声明目录下所有的文件 files[];
+                for (i in files.indices) { // 遍历目录下所有的文件
+                    deleteFile(files[i]) // 把每个文件 用这个方法进行迭代
+                }
+            }
+            file.delete()
+        }
+    }
 
     private suspend fun saveResult(result: CombinedCaptureResult): File = suspendCoroutine { cont ->
         when (result.format) {
