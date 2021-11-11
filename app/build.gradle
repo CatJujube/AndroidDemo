@@ -65,6 +65,7 @@ android {
         exclude 'lib/armeabi-v7a/libnative-lib.so'
         exclude 'lib/x86_64/libnative-lib.so'
     }
+    ndkVersion '23.1.7779620'
 }
 
 dependencies {

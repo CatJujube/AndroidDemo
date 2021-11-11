@@ -46,8 +46,9 @@
         <entry key="app/src/main/res/xml/provider_paths.xml" value="0.2671875" />
         <entry key="cameraxex/src/main/res/drawable/ic_delete.xml" value="0.30364583333333334" />
         <entry key="cameraxex/src/main/res/layout/activity_camera_xex_main.xml" value="0.490625" />
+        <entry key="opengles/src/main/res/layout/activity_main.xml" value="0.1" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK" />
 </project>
